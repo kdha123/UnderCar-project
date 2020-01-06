@@ -15,6 +15,7 @@ public class SendEmail {
 	public static void gmailSend(String title, String content, String email) {
         String user = "kdh29548296@gmail.com"; // 네이버일 경우 네이버 계정, gmail경우 gmail 계정
         String password = "12345";   // 패스워드
+		//비밀번호 바꿔줘야함
 
         // SMTP 서버 정보를 설정한다.
         Properties prop = new Properties();
