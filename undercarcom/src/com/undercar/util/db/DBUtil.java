@@ -16,8 +16,7 @@ public class DBUtil {
 	// 객체에서 사용할 DB 정보 -> list(), view()... 다른 메서드에서 다필요로 하기 때문에
 	// 전역변수로 선언한다.
 	private static final String url 
-//	= "jdbc:oracle:thin:@402-oracle:1521:orcl";
-	= "jdbc:oracle:thin:@106.243.249.69:4521:orcl";
+	= "jdbc:oracle:thin:@402-oracle:1521:orcl";
 	private static final String id = "c##team1";
 	private static final String pw = "team1";
 		
