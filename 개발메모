@@ -1,6 +1,9 @@
 1. MVC2(Model View Controller)
 2. Beans -> 한번만 생성(new)
 3. 객체지향적으로 개발
+4. 이관 -> 개발이 끝나면 운영을 위한 서버 - OS 설치, JAVA 설치 + 환경설정, tomcat 서버 설치 + 환경설정
+ - 프로젝트 Export 해서 war 파일을 서버 webapps로 이동시키고 Servers의 config에서 server.xml을 복사해서 tomcat9 config에 덮어쓰기 한다.
+
 
 .IDE -> Eclipse
 .builder -> Ant
