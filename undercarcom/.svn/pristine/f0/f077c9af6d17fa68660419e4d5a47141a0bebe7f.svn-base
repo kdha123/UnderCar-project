@@ -1,0 +1,99 @@
+<%@page import="com.undercar.member.dto.LoginDTO"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>qna 글보기</title>
+
+
+<%
+
+request.setCharacterEncoding("utf-8");//post 요청 한글처리
+//******* id  얻기
+LoginDTO dto = (LoginDTO)session.getAttribute("login");
+int grade= dto.getGrade();
+String id1=dto.getId();
+
+%>
+<script type="text/javascript">
+$(function(){
+	// 버튼 이벤트 처리
+	$("#deleteBtn").click(function(){
+		if(!confirm("정말 삭제하시겠습니까?"))
+	
+			return false; // a tag의 href를 취소 시킨다. -> location.href를 변경하는 태그 a
+	
+	});
+ 	var grade = "<%=grade%>";
+ 	if(grade<9){
+	$("#answer,#faq").hide();
+	
+ 	}
+ 	var id2 = ${dto.id}
+ 	var id1 = "<%=id1%>";
+ 	if(id1==id2){
+	$("#deleteBtn,#update").hide();
+	
+ 	}
+ 	
+ 	$("#test").click(function(){
+ 		alert(id2)
+ 	});
+	var levNo = ${dto.levNo}
+ 	if(levNo!=0){ 
+			$("#deleteBtn,#update").hide();  
+	};
+ 	$("#faq").click(function(){
+ 		if(levNoo==0){
+ 	        	alert( "답변글을 선택해주세요") 
+ 			return false;}
+ 		  
+ 	});
+ 
+ 	 
+});
+</script>
+
+<style type="text/css">
+
+
+</style>
+</head>
+<body>
+<h1>qna 글보기</h1>
+
+<table class="table">
+<tr>
+<td align="right" ><strong>제목:</strong></td><td align="left" colspan="1" width="70%" >${dto.title }</td>
+<td  align="right"><strong>글번호:</strong></td><td >${dto.no}</td>
+</tr>
+<tr>
+<td style="white-space: nowrap;" colspan="5" align="center" width="60%"><strong>글내용</strong></td>
+
+</tr>
+<tr>
+<td colspan="6" style="white-space: pre;">${dto.content}
+</td>
+
+</tr>
+<tr>
+<td id="faq" align="left" colspan="2">
+    <form id="faq" action="/faq/writeForm.do" method="post">
+    <input type="hidden"  id="title" name="title" value="${dto.title}">
+    <input type="hidden"  id="content" name="content" value="${dto.content}">
+<button>자주하는 질문으로 보내기</button>
+    </form>
+</td>
+<td align="right" colspan="4">
+
+<a id="answer"  href="answerForm.do?no=${dto.no }"><button>답글</button></a>
+<a id="update" href="updateForm.do?no=${dto.no }"><button>수정</button></a>
+<a href="delete.do?no=${dto.no }" id="deleteBtn"><button>삭제</button></a>
+<a href="list.do"><button>목록</button></a>
+</td>
+</tr>
+</table>
+<button id="test">1</button>
+</html>

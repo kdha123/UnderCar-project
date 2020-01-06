@@ -1,0 +1,25 @@
+package com.undercar.carbrand.dto;
+
+public class CarBrandDTO {
+
+	int no;
+	String brand;
+	
+	public int getNo() {
+		return no;
+	}
+	public void setNo(int no) {
+		this.no = no;
+	}
+	public String getBrand() {
+		return brand;
+	}
+	public void setBrand(String brand) {
+		this.brand = brand;
+	}
+	@Override
+	public String toString() {
+		return "CarBrand [no=" + no + ", brand=" + brand + "]";
+	}
+	
+}

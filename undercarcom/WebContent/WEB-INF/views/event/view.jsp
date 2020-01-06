@@ -1,0 +1,40 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>이벤트 보기</title>
+<script type="text/javascript">
+$(function(){
+	$("#deleteBtn").click(function(){
+		if(!confirm("정말 삭제하시겠습니까?"))
+			return false; // a tag의 href를 취소 시킨다. -> location.href를 변경하는 태그 a
+	});
+});
+</script>
+</head>
+<body>
+<table class="table">
+	<tr>
+		<th>번호</th>
+		<td>${dto.no }</td>
+	</tr>
+	<tr>
+		<th>제목</th>
+		<td>${dto.title }</td>
+	</tr>
+	<tr>
+		<th>이미지</th>
+		<td><a href="https://www.naver.com"><img alt="" src="${dto.image }"></a></td>
+	</tr>
+	<tr>
+		<td colspan="3">
+			<a href="updateForm.do?no=${param.no }&deleteFile1=${dto.image}&deleteFile2=${dto.repImage}" class="btn btn-success">수정</a>
+			<a href="delete.do?no=${param.no }&perPageNum=${param.perPageNum }&deleteFile1=${dto.image}&deleteFile2=${dto.repImage}" class="btn btn-danger" id="deleteBtn">삭제</a>
+			<a href="list.do" class="btn btn-default">리스트</a>
+		</td>	
+	</tr>
+</table>
+</body>
+</html>

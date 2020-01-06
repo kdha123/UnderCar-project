@@ -1,0 +1,139 @@
+package com.undercar.sell.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.undercar.attachment.dto.AttachmentDTO;
+import com.undercar.caroption.dto.CarOptionDTO;
+import com.undercar.category.dto.CategoryDTO;
+import com.undercar.sell.dto.SellDTO;
+import com.undercar.util.db.DBUtil;
+import com.undercar.util.page.PageObject;
+
+public class SellDAO {
+
+	public List<Object> list(PageObject pageObject)throws Exception{
+		
+		System.out.println("SellDAO.list()");
+		
+		List<Object> list = null;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select s.no, s.title, s.condition, s.hit, a.file1 from sell s, attachment a "
+				+ " where s.no = a.sell_no ";
+		
+		// 검색 sql 부분
+//		sql +="";
+		
+		sql += " order by s.no desc, s.condition desc ";
+		
+		sql += " select rownum rnum, no, title, condition, hit, file1 "
+				+ " from (" + sql + ") ";
+		
+		sql += " select * from (" + sql + ") "
+				+ " where rnum between ? and ? ";
+		System.out.println("SellDAO.list().sql:" + sql);
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		int idx = 1;
+		// 검색
+//		idx = SerchCondition.setPreparedStatement(pstmt, pageObject, idx);
+		
+		pstmt.setInt(idx++, pageObject.getStartRow());
+		pstmt.setInt(idx++, pageObject.getEndRow());
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null) {
+			while(rs.next()) {
+				if(list == null) list = new ArrayList<Object>();
+				
+				SellDTO dto = new SellDTO();
+				AttachmentDTO adto = new AttachmentDTO();
+				dto.setNo(rs.getInt("no"));
+				dto.setTitle(rs.getString("title"));
+				dto.setCondition(rs.getInt("condition"));
+				dto.setHit(rs.getInt("hit"));
+				adto.setFile1(rs.getString("file1"));
+				list.add(dto);
+				list.add(adto);
+				
+			}// end of while
+		}// end of if
+		DBUtil.close(con, pstmt, rs);
+		
+		System.out.println("SellDAO.list().list:" + list);
+		
+		return list;
+		
+	}// end of list
+	
+	public int getTotalRow(PageObject pageObject)throws Exception{
+		
+		System.out.println("SellDAO.getTotal?Row()");
+		
+		int totalRow = 0;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select count (*) cnt from sell ";
+	
+		// 검색
+//		sql += SearchCondition.getSearchSQLWithWhere(pageObject);
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		int idx = 1 ;
+		
+		// 검색
+//		idx = SearchCondition.getPreparedStatement(pstmt, pageObject, idx);
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null && rs.next()) {
+			
+			totalRow = rs.getInt("cnt");
+		}// end of if
+		
+		return totalRow;
+	}// end of getTotalRow
+	
+	public int write(SellDTO dto, AttachmentDTO adto, CategoryDTO cdto, CarOptionDTO odto)throws Exception{
+		
+		System.out.println("SellDAO.write().dto" + dto);
+		System.out.println("SellDAO.write().adto" + adto);
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql1 = " insert into sell(no, hit, condition, grade, title, writer) "
+				+ " values(sell_seq.nextval, ?, ?, ?, ?, ?) ";
+				
+		String sql2 = " insert into attachment( no, sell_no, file1, file2, file3, file4, file5, file6, file7, file8, file9, file10, "
+				+ " file11, file12, file13, file14, file15, file16, file17, file18, file19, file20) "
+				+ " values(attachment_seq.nextval, sell_seq.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+				
+		String sql3 = " insert intro category(no, sell_no, distance, price, model, brand, grade, cartype, year, location, fuel, "
+				+ " carnumber, carclass, spec, color, trans) "
+				+ " values(category_seq, sell_seq, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+				
+		String sql4 = " insert into caroption(opno, sell_no, navi, sun, smart, wind, cruz, handle, ldws, aeb, airbag, mirror, "
+				+ " tpms, trunk, autolight, wipper, parking, hot, bluetooth, hipass, sheet, wheel, pano, ledlignt, airsus) "
+				+ " values(opno_seq, sell_seq.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql1);
+		
+		
+		
+		
+		int result = pstmt.executeUpdate();
+		
+		return result;
+		
+	}
+	
+}// end of sell

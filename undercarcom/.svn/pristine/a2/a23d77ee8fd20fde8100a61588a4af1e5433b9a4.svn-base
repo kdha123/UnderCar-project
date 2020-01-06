@@ -1,0 +1,54 @@
+package com.undercar.main;
+
+import java.io.PrintWriter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class AjaxController implements Controller {
+	
+	private Service memberIdCheckService;
+	private Service memberPwCheckService;
+	public void setMemberIdCheckService(Service memberIdCheckService) {
+		this.memberIdCheckService = memberIdCheckService;
+	}
+	public void setMemberPwCheckService(Service memberPwCheckService) {
+		this.memberPwCheckService = memberPwCheckService;
+	}
+	
+	public AjaxController() {}
+	@Override
+	public String execute(HttpServletRequest request, HttpServletResponse response, String uri) throws Exception {
+		// TODO Auto-generated method stub
+		response.setCharacterEncoding("utf-8");
+		PrintWriter out = response.getWriter();
+		switch (uri) {
+		//회원가입
+		case "/ajax/idCheck.do":
+			System.out.println("AjaxController.execute(). - idCheck");
+			String id = (String)memberIdCheckService.service(new Object[] {request.getParameter("id")});
+			if(id == null)
+				out.print("<span style='color:blue'>사용 가능한 아이디 입니다.</span>");
+			else
+				out.print("<span style='color:red'>중복된 아이디 입니다.</span>");
+			break;
+		case "/ajax/pwCheck.do":
+			System.out.println("AjaxController.execute(). - pwCheck");
+			String inputPw = request.getParameter("pw");
+			System.out.println(inputPw);
+			String ids = request.getParameter("id");
+			System.out.println(ids);
+			String pw = (String)memberPwCheckService.service(new Object[] {ids});
+			if(pw.equals(inputPw))
+				out.print("<span style='color:blue'>일치하는 비밀번호 입니다.</span>");
+			else
+				out.print("<span style='color:red'>틀린 비밀번호 입니다.</span>");
+			break;
+
+		default:
+			break;
+		}
+		return null;
+	}
+
+}

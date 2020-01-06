@@ -1,0 +1,55 @@
+package com.undercar.bean;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+
+import com.undercar.main.Controller;
+import com.undercar.main.Service;
+import com.undercar.member.controller.MemberController;
+import com.undercar.member.dao.MemberDAO;
+import com.undercar.member.service.MemberLoginService;
+
+/**
+ * Servlet implementation class Beans
+ */
+@WebServlet("/init")
+public class Beans extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	
+	private static Map<String, Controller> controllers = new HashMap<>();
+	private static Map<String, Service> services  = new HashMap<>();
+	private static Map<String, Object> daos = new HashMap<>();
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public Beans() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see Servlet#init(ServletConfig)
+	 */
+	public void init(ServletConfig config) throws ServletException {
+		// TODO Auto-generated method stub
+		System.out.println("Beans.init() -- {}");
+		System.out.println("객체 초기화 중--------------------");
+		
+		//--------------member----------------
+		daos.put("memberDAO", new MemberDAO());
+		services.put("memberLoginService", new MemberLoginService((MemberDAO) daos.get("memberDAO")));
+		controllers.put("memberController", new MemberController(services.get("memberLoginService")));
+		
+		System.out.println("객체 초기화 완료-------------------");
+	}// end of init()
+	
+	public static Controller getController(String name) {
+		return controllers.get("name");
+	}
+}

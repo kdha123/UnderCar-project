@@ -1,0 +1,123 @@
+package com.undercar.util.page;
+
+public class PageObject {
+
+	private int page; // 현재 페이지
+	private int perPageNum;// 한페이지에 표시할 데이터의 갯수
+	private int startRow;// 시작번호
+	private int endRow;// 끝번호
+	
+	private int totalRow;// 전체 데이터 갯수
+	private int totalPage;// 전체 페이지 갯수
+	private int perGroupPageNum;// 표시할 페이지의 갯수 
+	private int startPage;// 페이지 그룹에서 처음 나타내는 페이지
+	private int endPage;// 페이지 그룹에서 끝에 나타내는 페이지
+	
+	//------------ 검색-----------
+	private String key;
+	private String word;
+	
+	public PageObject() {
+		this(1, 12); //page : 1 perPageNum : 12
+	}
+	
+	public PageObject(int page, int perPageNum) {
+		this(page, perPageNum, 10);
+	}
+	
+	public PageObject(int page, int perPageNum, int perPageGroupNum) {
+		this.page = page;
+		this.perPageNum = perPageNum;
+		this.perGroupPageNum = perPageGroupNum;
+		
+		this.startRow = ((page-1)*perPageNum) + 1;
+		this.endRow = this.page * this.perPageNum;
+	}
+	
+	public int getPerPageNum() {
+		return perPageNum;
+	}
+
+	public int getStartRow() {
+		return startRow;
+	}
+
+	public int getEndRow() {
+		return endRow;
+	}
+
+	public int getTotalRow() {
+		return totalRow;
+	}
+
+	public int getPerGroupPageNum() {
+		return perGroupPageNum;
+	}
+
+	public int getStartPage() {
+		return startPage;
+	}
+
+	public int getEndPage() {
+		return endPage;
+	}
+	
+	public void setTotalRow(int totalRow) {
+		
+		this.totalRow = totalRow;
+		this.totalPage = (totalRow - 1) / perPageNum + 1;
+		
+		this.startPage = ((page - 1) / perGroupPageNum) * perGroupPageNum + 1;
+		this.endPage = startPage + perGroupPageNum -1;
+		if(endPage > totalPage)
+			this.endPage = totalPage;
+	}
+	
+	public int getTotalPage() {
+		return totalPage;
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
+	}
+
+	public String getWord() {
+		return word;
+	}
+
+	public void setWord(String word) {
+		this.word = word.trim();
+	}
+
+	@Override
+	public String toString() {
+		return "PageObject [page=" + page + ", perPageNum=" + perPageNum + ", startRow=" + startRow + ", endRow="
+				+ endRow + ", totalRow=" + totalRow + ", totalPage=" + totalPage + ", perGroupPageNum="
+				+ perGroupPageNum + ", startPage=" + startPage + ", endPage=" + endPage + ", key=" + key + ", word="
+				+ word + "]";
+	}
+	
+	public static PageObject getInstance(String strPage, String strPerPageNum) {
+		PageObject pageObject = null;
+		
+		if(strPage == null || strPage.contentEquals("")) {
+			pageObject = new PageObject();
+		
+		}else {
+			int page = Integer.parseInt(strPage);
+			
+			if(strPerPageNum == null || strPerPageNum.contentEquals("")) {
+				strPerPageNum = "12";
+			}// end of if
+			
+			int perPageNum = Integer.parseInt(strPerPageNum);
+			pageObject = new PageObject(page, perPageNum);
+		}// end of else
+		System.out.println("PageObject.getInstance().pageObject:" + pageObject);
+		return pageObject;
+	}// end of getInstance
+}//end of PageObject

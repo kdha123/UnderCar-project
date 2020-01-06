@@ -1,0 +1,228 @@
+package com.undercar.caroption.dto;
+
+public class CarOptionDTO {
+
+	int opno, navi, sun, smart, wind, cruz, handle, ldws, aeb, airbag,
+		mirror, tpms, trunk, autolight, wipper, parking, hot, bluetooth,
+		hipass, sheet, wheel, pano, ledlight, airsus, sell_no;
+	String ctcontent;
+
+	public int getOpno() {
+		return opno;
+	}
+
+	public void setOpno(int opno) {
+		this.opno = opno;
+	}
+
+	public int getNavi() {
+		return navi;
+	}
+
+	public void setNavi(int navi) {
+		this.navi = navi;
+	}
+
+	public int getSun() {
+		return sun;
+	}
+
+	public void setSun(int sun) {
+		this.sun = sun;
+	}
+
+	public int getSmart() {
+		return smart;
+	}
+
+	public void setSmart(int smart) {
+		this.smart = smart;
+	}
+
+	public int getWind() {
+		return wind;
+	}
+
+	public void setWind(int wind) {
+		this.wind = wind;
+	}
+
+	public int getCruz() {
+		return cruz;
+	}
+
+	public void setCruz(int cruz) {
+		this.cruz = cruz;
+	}
+
+	public int getHandle() {
+		return handle;
+	}
+
+	public void setHandle(int handle) {
+		this.handle = handle;
+	}
+
+	public int getLdws() {
+		return ldws;
+	}
+
+	public void setLdws(int ldws) {
+		this.ldws = ldws;
+	}
+
+	public int getAeb() {
+		return aeb;
+	}
+
+	public void setAeb(int aeb) {
+		this.aeb = aeb;
+	}
+
+	public int getAirbag() {
+		return airbag;
+	}
+
+	public void setAirbag(int airbag) {
+		this.airbag = airbag;
+	}
+
+	public int getMirror() {
+		return mirror;
+	}
+
+	public void setMirror(int mirror) {
+		this.mirror = mirror;
+	}
+
+	public int getTpms() {
+		return tpms;
+	}
+
+	public void setTpms(int tpms) {
+		this.tpms = tpms;
+	}
+
+	public int getTrunk() {
+		return trunk;
+	}
+
+	public void setTrunk(int trunk) {
+		this.trunk = trunk;
+	}
+
+	public int getAutolight() {
+		return autolight;
+	}
+
+	public void setAutolight(int autolight) {
+		this.autolight = autolight;
+	}
+
+	public int getWipper() {
+		return wipper;
+	}
+
+	public void setWipper(int wipper) {
+		this.wipper = wipper;
+	}
+
+	public int getParking() {
+		return parking;
+	}
+
+	public void setParking(int parking) {
+		this.parking = parking;
+	}
+
+	public int getHot() {
+		return hot;
+	}
+
+	public void setHot(int hot) {
+		this.hot = hot;
+	}
+
+	public int getBluetooth() {
+		return bluetooth;
+	}
+
+	public void setBluetooth(int bluetooth) {
+		this.bluetooth = bluetooth;
+	}
+
+	public int getHipass() {
+		return hipass;
+	}
+
+	public void setHipass(int hipass) {
+		this.hipass = hipass;
+	}
+
+	public int getSheet() {
+		return sheet;
+	}
+
+	public void setSheet(int sheet) {
+		this.sheet = sheet;
+	}
+
+	public int getWheel() {
+		return wheel;
+	}
+
+	public void setWheel(int wheel) {
+		this.wheel = wheel;
+	}
+
+	public int getPano() {
+		return pano;
+	}
+
+	public void setPano(int pano) {
+		this.pano = pano;
+	}
+
+	public int getLedlight() {
+		return ledlight;
+	}
+
+	public void setLedlight(int ledlight) {
+		this.ledlight = ledlight;
+	}
+
+	public int getAirsus() {
+		return airsus;
+	}
+
+	public void setAirsus(int airsus) {
+		this.airsus = airsus;
+	}
+
+	public String getCtcontent() {
+		return ctcontent;
+	}
+
+	public void setCtcontent(String ctcontent) {
+		this.ctcontent = ctcontent;
+	}
+
+	public int getSell_no() {
+		return sell_no;
+	}
+
+	public void setSell_no(int sell_no) {
+		this.sell_no = sell_no;
+	}
+
+	@Override
+	public String toString() {
+		return "CarOptionDTO [opno=" + opno + ", navi=" + navi + ", sun=" + sun + ", smart=" + smart + ", wind=" + wind
+				+ ", cruz=" + cruz + ", handle=" + handle + ", ldws=" + ldws + ", aeb=" + aeb + ", airbag=" + airbag
+				+ ", mirror=" + mirror + ", tpms=" + tpms + ", trunk=" + trunk + ", autolight=" + autolight
+				+ ", wipper=" + wipper + ", parking=" + parking + ", hot=" + hot + ", bluetooth=" + bluetooth
+				+ ", hipass=" + hipass + ", sheet=" + sheet + ", wheel=" + wheel + ", pano=" + pano + ", ledlight="
+				+ ledlight + ", airsus=" + airsus + ", sell_no=" + sell_no + ", ctcontent=" + ctcontent + "]";
+	}
+
+}

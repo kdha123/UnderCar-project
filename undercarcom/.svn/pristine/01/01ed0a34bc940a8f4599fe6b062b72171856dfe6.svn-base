@@ -1,0 +1,189 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="tl" tagdir="/WEB-INF/tags" %>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>메시지 리스트</title>
+<style type="text/css">
+.title:hover{
+	cursor: pointer;
+	background: #eee;
+}
+#allSend{
+	float: right;
+}
+.notelist { width: 300px; border: 1px solid #000000; border-top: none; border-right: none; } 
+.notelist .notelist_head { clear: left; margin: 0; padding: 0; list-style-type: none; position: relative; border-top: 1px solid red; display: inline-block; } 
+.notelist .notelist_head .notelist_info { box-sizing: border-box; width: 100px; float: left; text-align: center; margin: 0; padding: 2px 1px; position: relative; border-right: 1px solid red; }
+</style>
+<script type="text/javascript">
+$(function(){
+	$(".pagination > li:not('.active')").click(function(){
+		var page = $(this).data("page");
+		var pageType = $("#pageType").val();
+		var deleteType = $("#deleteType").val();
+		location = "list.do?pageType="+pageType+"&deleteType="+deleteType+"&page="+page+"&perPageNum=${pageObject.perPageNum}"+ "&key=${pageObject.key}"
+		+ "&word=${pageObject.word}";
+		return false;
+	});
+	
+	$("li.active").click(function(){
+		return false;
+	});
+	
+	$(".title").click(function(){
+		var no = $(this).parent().find(".no").text();
+		location = "view.do?no="+no
+				+ "&cnt=1"
+				+ "&page=${pageObject.page}"
+				+ "&perPageNum=${pageObject.perPageNum}"
+				${(!empty pageObject.word)?" + \"&key=" += pageObject.key += "&word="
+					+= pageObject.word += "\"":""};
+	});
+	
+	// 현재 페이지 url 가져오기
+	var url = window.location.href;
+	// 현재 페이지의 url에 따라 변수 값 부여
+	if(url.indexOf("/list.do?pageType=acc") > 0){// 받은 메시지함
+		$("#pageType").val("acc");
+		$(".thsen").attr("style", "text-decoration: underline;")
+	} else if(url.indexOf("/list.do?pageType=sen") > 0){// 보낸 메시지함
+		$("#pageType").val("sen");
+		$(".thacc").attr("style", "text-decoration: underline;")
+	} else if(url.indexOf("/list.do?pageType=no") > 0){// 안읽은 메시지함
+		$("#pageType").val("no");
+	} else if(url.indexOf("/list.do?pageType=all") > 0){// 전체 메시지함
+		$("#pageType").val("all");
+	}
+	
+	// 체크박스 전체 선택, 해제
+	$("#allCheck").click(function(){
+		if($("#allCheck").prop("checked")){
+			//input태그의 name이 chk인 태그들을 찾아서 checked옵션을 true로 정의
+			$("input[name=rowCheck]").prop("checked", true);
+		} else {
+			$("input[name=rowCheck]").prop("checked", false);
+		}
+	});
+	
+	// 전체 메시지함을 눌렀을 때 전체메시지만 보이도록
+	$("#allSend").click(function(){
+		location = "list.do?pageType=all";
+	});
+	
+	// 전체 메시지함일 경우 no, sender, accepter, testCheck 숨기기
+	var allWriteCheck = "${login.id }";
+	if(allWriteCheck == "admin"){
+		if(url.indexOf("/list.do?pageType=all") > 0){
+			$(".sender").hide();
+			$(".accepter").hide();
+			$(".no").hide();
+		} else {
+			$(".sender").show();
+			$(".accepter").show();
+			$(".no").show();
+		}
+	}
+	
+	var id = "${login.id}";
+	if(id == "admin"){
+		$(".opAcc").attr("hidden", "");
+	}
+
+	if(url.indexOf("/list.do?pageType=acc") > 0){// 받은 메시지함
+		$(".opAcc").attr("hidden", "");
+	} else if(url.indexOf("/list.do?pageType=sen") > 0){// 보낸 메시지함
+		$(".opSen").attr("hidden", "");
+	} else if(url.indexOf("/list.do?pageType=no") > 0){// 안읽은 메시지함
+		$(".opAcc").attr("hidden", "");
+	}
+});
+</script>
+</head>
+<body>
+<div class="container">
+<%-- 검색 --%>
+<div id="searchDiv">
+	<form action="list.do" class="form-inline">
+		<input name="page" value="1" type="hidden" />
+		<%-- 보낸 메시지함인지 받은 메시지함인지 안읽은 메시지함인지 확인하는 변수, default는 받은 메시지함  --%>
+		<input type="hidden" id="pageType" name="pageType" value=""/>
+		<%-- list에서 삭제하는지, view에서 삭제하는지 확인하는 변수 --%>
+		<input type="hidden" id="deleteType" name="deleteType" value="0"/>
+		<input type="hidden" id="perPageNum" name="perPageNum" value="${pageObject.perPageNum }"/>
+		<div class="form-group">
+			<select class="form-control" id="key" name="key">
+				<option selected="selected">검색조건</option>
+				<option value="s" ${(param.key == "s")?"selected":"" } class="opSen">보낸 사람</option>
+				<option value="a" ${(param.key == "a")?"selected":"" } class="opAcc">받는 사람</option>
+				<option value="c" ${(param.key == "c")?"selected":"" }>내용</option>
+				<option value="t" ${(param.key == "t")?"selected":"" }>제목</option>
+			</select>
+		</div>
+		<div class="input-group">
+			<input type="text" class="form-control" placeholder="Search"
+				name="word" value="${param.word }" id="word">
+			<div class="input-group-btn">
+				<button class="btn btn-default" type="submit" id="schBtn">
+					<i class="glyphicon glyphicon-search"></i>
+				</button>
+			</div>
+		</div>
+	</form>
+</div>
+<form action="delete.do" method="post">
+<table class="table">
+	<tr>
+		<%-- 체크했을 때 번호를 넘기면서 삭제하기 위한 처리 --%>
+		<td colspan="5">
+			<%-- 보낸 메시지함인지 받은 메시지함인지 안읽은 메시지함인지 확인하는 변수, default는 받은 메시지함  --%>
+			<input type="hidden" id="pageType" name="pageType" value=""/>
+			<%-- list에서 삭제하는지, view에서 삭제하는지 확인하는 변수 --%>
+			<input type="hidden" id="deleteType" name="deleteType" value="0"/>
+			<input type="hidden" id="perPageNum" name="perPageNum" value="${pageObject.perPageNum }"/>
+			<button>삭제</button>
+			<input type=${(login.id == "admin")? "\"button\"": "\"hidden\"" } id="allSend" name="allSend" value="전체 메시지"/>
+		</td>
+	</tr>
+	<tr>
+		<th><input type="checkbox" id="allCheck"/></th>
+		<th class="no">번호</th>
+		<th>제목</th>
+		<th class="sender thsen">보낸사람</th>
+		<th class="accepter thacc">받는사람</th>
+		<th>보낸날짜</th>
+	</tr>
+	<c:forEach items="${list }" var="dto">
+		<tr class=dataRow>
+			<td>
+				<input type="checkbox" name="rowCheck" id="rowCheck" value="${dto.no }"/>
+			</td>
+			<td class="no">${dto.no }</td>
+			<td class="title">${dto.title }</td>
+			<td class="sender">${dto.sender }</td>
+			<td class="accepter">${dto.accepter }</td>
+			<td>${dto.sendDate }</td>
+		</tr>
+	</c:forEach>
+	<!-- 페이지를 이동시키는 페이지네이션 -->
+	<tr>
+		<td colspan="6">
+			<tl:pageNav  page="${pageObject.page }"
+		 	startPage="${pageObject.startPage }" endPage="${pageObject.endPage }" 
+		 	totalPage="${pageObject.totalPage }" />
+		</td>
+	</tr>
+	
+</table>
+</form>
+<a href="writeForm.do?perPageNum=${pageObject.perPageNum }"><button>글쓰기</button></a>
+<a href="list.do?pageType=sen&page=1&perPageNum=${pageObject.perPageNum }"><button>보낸 메시지함</button></a>
+<a href="list.do?pageType=acc&page=1&perPageNum=${pageObject.perPageNum }"><button>받은 메시지함</button></a>
+<a href="list.do?pageType=no&page=1&perPageNum=${pageObject.perPageNum }"><button>안읽은 메시지함</button></a>
+</div>
+</body>
+</html>

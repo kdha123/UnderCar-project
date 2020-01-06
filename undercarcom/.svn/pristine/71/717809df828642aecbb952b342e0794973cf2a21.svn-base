@@ -1,0 +1,32 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>공지사항 글쓰기 폼</title>
+</head>
+<body>
+<div class="container">
+	<form action="write.do" method="post" id="writeForm" enctype="multipart/form-data">
+	<input type="hidden" name="perPageNum" value="${param.perPageNum }">
+		<div class="form-group">
+			<label for="title">제목</label>
+			<input type="text" class="form-control" id="title" name="title">
+		</div>
+		<div class="form-group">
+			<label for="content">내용</label>
+			<textarea class="form-control" rows="5" id="content" name="content"></textarea>
+		</div>
+		<div class="form-group">
+			<label for="fileName">파일첨부</label>
+			<input multiple="multiple" type="file" class="form-control" id="fileName" name="fileName">
+		</div>
+		
+		<button type="submit" class="btn btn-success">등록</button>
+		<button type="reset" class="btn btn-default">다시입력</button>
+		<button type="button" onclick="history.back()" class="btn btn-warning">취소</button>
+	</form>	
+	</div>
+</body>
+</html>

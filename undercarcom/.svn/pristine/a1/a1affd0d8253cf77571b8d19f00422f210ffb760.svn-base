@@ -1,0 +1,135 @@
+package com.undercar.member.controller;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.undercar.main.Controller;
+import com.undercar.main.Execute;
+import com.undercar.main.Service;
+import com.undercar.member.dto.LoginDTO;
+import com.undercar.member.dto.MemberDTO;
+
+public class MemberController implements Controller {
+	
+	private Service loginService;
+	private Service joinService;
+	private Service infoService;
+	
+	
+	public MemberController(Service loginService,Service joinService, Service infoService) {
+		this.loginService = loginService;
+		this.joinService = joinService;
+		this.infoService = infoService;
+	}
+	@Override
+	public String execute(HttpServletRequest request, HttpServletResponse response, String uri) throws Exception {
+		System.out.println("memberController");
+		String jsp = "";
+		HttpSession session = request.getSession(true);
+		
+		switch (uri) {
+		case "/member/loginForm.do":
+			// session의 msg를 request에 담고 session의 msg는 지운다.
+				request.setAttribute("msg", session.getAttribute("msg"));
+				session.removeAttribute("msg");
+				jsp = "member/loginForm";
+			break;
+			
+		case "/member/login.do":
+			String id = request.getParameter("id");
+			String pw = request.getParameter("pw");
+			
+			LoginDTO dto = new LoginDTO();
+			dto.setId(id);
+			dto.setPw(pw);
+			
+			session.setAttribute("login", Execute.service(loginService, dto));
+			// 자동으로 리스트로 이동시켜야 한다.
+				String nextURI = (String) session.getAttribute("nextURI");
+				if(nextURI != null) {
+					jsp = "redirect:"+nextURI;
+					session.removeAttribute("nextURI");
+				}else {
+					jsp ="redirect:loginForm.do";
+				}
+			
+			break;
+		case "/member/logout.do":
+				session.invalidate();
+			jsp = "redirect:loginForm.do";// 나중에 메인으로 가도록 만들어야함
+			break;
+		case "/member/joinForm.do":
+			jsp = "member/joinForm";
+			break;
+		case "/member/join.do":
+			System.out.println("MemberController.join.do");
+			
+			Integer bno, btel;
+			
+			id = request.getParameter("id");
+			pw = request.getParameter("pw");
+			String name = request.getParameter("name");
+			String birth = request.getParameter("birth");
+			String gender = request.getParameter("gender");
+			int grade = Integer.parseInt(request.getParameter("grade"));
+			String bno1 = request.getParameter("bno");
+			String baddr = request.getParameter("baddr");
+			String bname = request.getParameter("bname");
+			String btel1 = request.getParameter("btel");
+			String content = request.getParameter("content");
+			// 여러 데이터를 한번에 받을 때
+			String[] tels = request.getParameterValues("tel");
+			String tel = String.join("-", tels);
+			String email = request.getParameter("email");
+			
+			if(bno1 == null && btel1 == null || bno1.equals("") && btel1.equals("")) {
+				bno1="0";
+				btel1="0";
+			}
+			bno = Integer.parseInt(bno1);
+			btel = Integer.parseInt(btel1);
+			
+			// MemberDTO 객체 생성 -> 자료 저장
+			MemberDTO joinDto = new MemberDTO();
+			joinDto.setId(id);
+			joinDto.setPw(pw);
+			joinDto.setName(name);
+			joinDto.setBirth(birth);
+			joinDto.setGender(gender);
+			joinDto.setTel(tel);
+			joinDto.setEmail(email);
+			joinDto.setGrade(grade);
+			joinDto.setBno(bno);
+			joinDto.setBaddr(baddr);
+			joinDto.setBname(bname);
+			joinDto.setBtel(btel);
+			joinDto.setContent(content);
+			Execute.service(joinService, joinDto);
+			jsp = "redirect:welcome.do?id="+id;
+		
+			break;
+		case "/member/welcome.do":
+			jsp = "member/welcome";
+			break;
+		case "/member/select.do":
+			jsp = "member/select";
+			break;
+		case "/member/agree.do":
+			jsp = "member/agree";
+			break;
+		case "/member/info.do":
+			LoginDTO inforDTO = (LoginDTO) session.getAttribute("login");
+			id = inforDTO.getId();
+			request.setAttribute("dto", Execute.service(infoService, id));
+			
+			jsp = "member/info";
+			break;
+
+		default:
+			break;
+		}
+		return jsp;
+	}
+
+}

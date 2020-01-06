@@ -1,0 +1,48 @@
+package com.undercar.bean;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+
+import com.undercar.main.Controller;
+import com.undercar.main.Service;
+
+/**
+ * Servlet implementation class Beans
+ */
+@WebServlet("/init")
+public class Beans extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	
+	private Map<String, Controller> controllers = new HashMap<>();
+	private Map<String, Service> services  = new HashMap<>();
+	private Map<String, Object> daos = new HashMap<>();
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public Beans() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see Servlet#init(ServletConfig)
+	 */
+	public void init(ServletConfig config) throws ServletException {
+		// TODO Auto-generated method stub
+		System.out.println("Beans.init() -- {}");
+		System.out.println("객체 초기화 중--------------------");
+		
+		
+		System.out.println("객체 초기화 완료-------------------");
+	}// end of init()
+	
+	public Controller getController(String name) {
+		return controllers.get("name");
+	}
+}

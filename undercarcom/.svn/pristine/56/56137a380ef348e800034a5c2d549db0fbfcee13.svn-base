@@ -1,0 +1,112 @@
+package com.undercar.category.dto;
+
+public class CategoryDTO {
+
+	int no, distance, price, sell_no;
+	String model, brand, grade, cartype, year, location, fuel, 
+	carnumber, carclass, spec, color, trans;
+	public int getNo() {
+		return no;
+	}
+	public void setNo(int no) {
+		this.no = no;
+	}
+	public int getDistance() {
+		return distance;
+	}
+	public void setDistance(int distance) {
+		this.distance = distance;
+	}
+	public int getPrice() {
+		return price;
+	}
+	public void setPrice(int price) {
+		this.price = price;
+	}
+	public int getSell_no() {
+		return sell_no;
+	}
+	public void setSell_no(int sell_no) {
+		this.sell_no = sell_no;
+	}
+	public String getModel() {
+		return model;
+	}
+	public void setModel(String model) {
+		this.model = model;
+	}
+	public String getBrand() {
+		return brand;
+	}
+	public void setBrand(String brand) {
+		this.brand = brand;
+	}
+	public String getGrade() {
+		return grade;
+	}
+	public void setGrade(String grade) {
+		this.grade = grade;
+	}
+	public String getCartype() {
+		return cartype;
+	}
+	public void setCartype(String cartype) {
+		this.cartype = cartype;
+	}
+	public String getYear() {
+		return year;
+	}
+	public void setYear(String year) {
+		this.year = year;
+	}
+	public String getLocation() {
+		return location;
+	}
+	public void setLocation(String location) {
+		this.location = location;
+	}
+	public String getFuel() {
+		return fuel;
+	}
+	public void setFuel(String fuel) {
+		this.fuel = fuel;
+	}
+	public String getCarnumber() {
+		return carnumber;
+	}
+	public void setCarnumber(String carnumber) {
+		this.carnumber = carnumber;
+	}
+	public String getCarclass() {
+		return carclass;
+	}
+	public void setCarclass(String carclass) {
+		this.carclass = carclass;
+	}
+	public String getSpec() {
+		return spec;
+	}
+	public void setSpec(String spec) {
+		this.spec = spec;
+	}
+	public String getColor() {
+		return color;
+	}
+	public void setColor(String color) {
+		this.color = color;
+	}
+	public String getTrans() {
+		return trans;
+	}
+	public void setTrans(String trans) {
+		this.trans = trans;
+	}
+	@Override
+	public String toString() {
+		return "CategoryDTO [no=" + no + ", distance=" + distance + ", price=" + price + ", sell_no=" + sell_no
+				+ ", model=" + model + ", brand=" + brand + ", grade=" + grade + ", cartype=" + cartype + ", location="
+				+ location + ", fuel=" + fuel + ", carnumber=" + carnumber + ", carclass=" + carclass + ", spec=" + spec
+				+ ", color=" + color + ", trans=" + trans + "]";
+	} 
+	
+}

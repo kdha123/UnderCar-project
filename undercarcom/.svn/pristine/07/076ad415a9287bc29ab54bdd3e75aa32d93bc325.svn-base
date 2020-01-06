@@ -1,0 +1,57 @@
+package com.undercar.member.controller;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.undercar.main.Controller;
+import com.undercar.main.Execute;
+import com.undercar.main.Service;
+import com.undercar.member.dto.LoginDTO;
+
+public class MemberController implements Controller {
+	
+	private Service loginService;
+	
+	
+	public MemberController(Service loginService) {
+		this.loginService = loginService;
+	}
+	@Override
+	public String execute(HttpServletRequest request, HttpServletResponse response, String uri) throws Exception {
+		
+		String jsp = "";
+		HttpSession session = request.getSession(true);
+		
+		switch (uri) {
+		case "/member/loginForm.do":
+			
+				jsp = "member/loginForm";
+			break;
+			
+		case "/member/login.do":
+			String id = request.getParameter("id");
+			String pw = request.getParameter("pw");
+			
+			LoginDTO dto = new LoginDTO();
+			dto.setId(id);
+			dto.setPw(pw);
+			
+			
+			session.setAttribute("login", Execute.service(loginService, dto));
+			
+			jsp = "member/login";
+			break;
+		case "/member/logout.do":
+				session.invalidate();
+			jsp = "member/logout";
+			break;
+			
+
+		default:
+			break;
+		}
+		return jsp;
+	}
+
+}

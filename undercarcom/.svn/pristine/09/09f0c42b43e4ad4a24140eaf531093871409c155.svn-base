@@ -1,0 +1,23 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>약관동의</title>
+</head>
+<body>
+<div class="container">
+  <h2>회원가입</h2>
+  <p>회원의 종류를 선택해주세요 :</p>                  
+  <ul class="pager">
+    <li>
+    <a href="agree.do?grade=1">개인회원</a>
+    </li>
+    <li>
+    <a href="agree.do?grade=4">기업회원</a>
+    </li>
+  </ul>
+</div>
+</body>
+</html>

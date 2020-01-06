@@ -1,0 +1,139 @@
+package com.undercar.member.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import com.undercar.member.dto.LoginDTO;
+import com.undercar.member.dto.MemberDTO;
+import com.undercar.util.db.DBUtil;
+
+public class MemberDAO {
+
+	public LoginDTO login(LoginDTO dto) throws Exception{
+		System.out.println("MemberDAO.login().dto" + dto);
+		
+		LoginDTO outDTO = null;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select m.id, m.name, m.grade, g.gradeName from member m, grade g "
+				+ " where (m.id = ? and m.pw = ?) "
+				+ " and (m.grade = g.grade) ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, dto.getId());
+		pstmt.setString(2, dto.getPw());
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null && rs.next()) {
+			outDTO = new LoginDTO();
+			outDTO.setId(rs.getString("id"));
+			outDTO.setName(rs.getString("name"));
+			outDTO.setGrade(rs.getInt("grade"));
+			outDTO.setGradeName(rs.getString("gradeName"));
+		}
+		
+		DBUtil.close(con, pstmt, rs);
+		
+		System.out.println("MemberDAO.login() " + outDTO);
+		
+		return outDTO;
+		
+	}// end of login()
+	
+	public Integer join(MemberDTO dto) throws Exception{
+		System.out.println("MemberDAO.join() "+dto);
+		
+		Connection con = DBUtil.getConnection();
+		String sql = " insert into member(id,pw, name, birth, gender, tel, email, grade, bno, baddr, bname, "
+				+ " btel, content) values(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, dto.getId());
+		pstmt.setString(2, dto.getPw());
+		pstmt.setString(3, dto.getName());
+		pstmt.setString(4, dto.getBirth());
+		pstmt.setString(5, dto.getGender());
+		pstmt.setString(6, dto.getTel());
+		pstmt.setString(7, dto.getEmail());
+		pstmt.setInt(8, dto.getGrade());
+		pstmt.setInt(9, dto.getBno());
+		pstmt.setString(10, dto.getBaddr());
+		pstmt.setString(11, dto.getBname());
+		pstmt.setInt(12, dto.getBtel());
+		pstmt.setString(13, dto.getContent());
+		
+		int result = pstmt.executeUpdate();
+		
+		System.out.println("회원가입 성공" + dto);
+		
+		DBUtil.close(con, pstmt);
+		
+		return result;
+		
+	}// end of join()
+	
+	public String idCheck(String id) throws Exception {
+		System.out.println("MemberDAO.id "+id);
+		String checkId = null;
+		
+		Connection con = DBUtil.getConnection();
+		String sql = " select id from member where id = ? ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, id);
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs!=null &&rs.next()) {
+			checkId = rs.getString("id");
+		}
+		
+		DBUtil.close(con, pstmt, rs);
+		return checkId;
+	} // end od idCheck()
+	
+	//로그인한 아이디를 가지고 내정보보기를 할때
+	public MemberDTO view(String id) throws Exception{
+		System.out.println("MemberDAO.view() " + id);
+		MemberDTO dto = null;
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select id, name,to_char(birth,'yyyy-mm-dd') birth, gender, tel, email, grade from member where id = ? ";
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, id);
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs!=null && rs.next()) {
+			dto = new MemberDTO();
+			dto.setId(rs.getString("id"));
+			dto.setName(rs.getString("name"));
+			dto.setBirth(rs.getString("birth"));
+			dto.setGender(rs.getString("gender"));
+			dto.setTel(rs.getString("tel"));
+			dto.setEmail(rs.getString("email"));
+			dto.setGrade(rs.getInt("grade"));
+		}
+		DBUtil.close(con, pstmt, rs);
+		System.out.println("MemberDAO.view().dto "+dto);
+		return dto;
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+}

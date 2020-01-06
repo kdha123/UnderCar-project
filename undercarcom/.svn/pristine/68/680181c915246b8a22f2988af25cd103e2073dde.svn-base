@@ -1,0 +1,39 @@
+package com.undercar.sell.service;
+
+import com.undercar.attachment.dto.AttachmentDTO;
+import com.undercar.caroption.dto.CarOptionDTO;
+import com.undercar.category.dto.CategoryDTO;
+import com.undercar.main.Service;
+import com.undercar.sell.dao.SellDAO;
+import com.undercar.sell.dto.SellDTO;
+
+public class SellWriteService implements Service{
+
+	private SellDAO dao;
+	
+	
+	public SellWriteService(SellDAO dao) {
+		// TODO Auto-generated constructor stub
+		this.dao = dao;
+	}
+	
+	@Override
+	public Object service(Object[] objs) throws Exception {
+		// TODO Auto-generated method stub
+		
+		System.out.println("SellWriteService.serviece()");
+		
+		SellDTO dto = (SellDTO) objs[0];
+		AttachmentDTO adto = (AttachmentDTO) objs[1];
+		CategoryDTO cdto = (CategoryDTO) objs[2];
+		CarOptionDTO odto = (CarOptionDTO) objs[3];
+		dao.sellWrite(dto);
+		dao.attachmentWrite(dto, adto);
+		dao.categoryWrite(dto, cdto);
+		
+		return dao.caroptionWrite(dto, odto);
+	}
+
+	
+	
+}

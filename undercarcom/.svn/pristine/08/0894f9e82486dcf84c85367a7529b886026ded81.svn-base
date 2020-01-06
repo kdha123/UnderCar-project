@@ -1,0 +1,140 @@
+package com.undercar.message.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.undercar.message.dto.MessageDTO;
+import com.undercar.util.db.DBUtil;
+
+public class MessageDAO {
+
+	// 1. list()
+	public List<MessageDTO> list() throws Exception {
+		System.out.println("MessageDAO.list()");
+
+		List<MessageDTO> list = null;
+
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " select no, title, sender, accepter, to_char(sendDate, 'yyyy-mm-dd') sendDate from message order by no desc ";
+		System.out.println("MessageDAO.list().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		// 5. 실행
+		ResultSet rs = pstmt.executeQuery();
+		// 6. 데이터 표시 / 저장
+		if (rs != null) {
+			while (rs.next()) {
+				if (list == null)
+					list = new ArrayList<MessageDTO>();
+				MessageDTO dto = new MessageDTO();
+				dto.setNo(rs.getInt("no"));
+				dto.setTitle(rs.getString("title"));
+				dto.setSender(rs.getString("sender"));
+				dto.setAccepter(rs.getString("accepter"));
+				dto.setSendDate(rs.getString("sendDate"));
+				list.add(dto);
+			} // end of while(rs.next())
+		} // end of if(rs != null)
+		System.out.println("MessageDAO.list().list : " + list);
+
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt, rs);
+
+		return list;
+	}// end of list()
+
+	// 2. view()
+	public MessageDTO view(int no) throws Exception {
+		System.out.println("MessageDAO.view().no : " + no);
+
+		MessageDTO dto = null;
+
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " select no, title, content, sender, accepter, sendDate, acceptDate"
+				+ " from message where no = ? ";
+		System.out.println("MessageDAO.view().sql : " + sql);
+		// 4. 실행 객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setInt(1, no);
+		// 5. 실행
+		ResultSet rs = pstmt.executeQuery();
+		// 6. 데이터 표시 / 저장
+		if (rs != null && rs.next()) {
+			dto = new MessageDTO();
+			dto.setNo(rs.getInt("no"));
+			dto.setTitle(rs.getString("title"));
+			dto.setContent(rs.getString("content"));
+			dto.setSender(rs.getString("sender"));
+			dto.setAccepter(rs.getString("accepter"));
+			dto.setSendDate(rs.getString("sendDate"));
+			dto.setAcceptDate(rs.getString("acceptDate"));
+		} // end of if
+		System.out.println("MessageDAO.view().dto : " + dto);
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt, rs);
+
+		return dto;
+	}// end of view()
+
+	// 3. write
+	public int write(MessageDTO dto) throws Exception {
+		System.out.println("MessageDAO.write().dto : " + dto);
+
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " insert into message(no, title, content, sender, accepter)"
+				+ " values(message_seq.nextval, ?, ?, ?, ?) ";
+		System.out.println("MessageDAO.write().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, dto.getTitle());
+		pstmt.setString(2, dto.getContent());
+		pstmt.setString(3, dto.getSender());
+		pstmt.setString(4, dto.getAccepter());
+		// 5. 실행
+		int result = pstmt.executeUpdate();
+		// 6. 데이터 표시 / 저장
+		if (result == 1)
+			System.out.println("메시지 보내기 성공");
+		else
+			System.out.println("메시지 보내기 실패");
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt);
+
+		return result;
+	}// end of write()
+
+	// 4. delete
+	public int delete(int no) throws Exception {
+		System.out.println("MessageDAO.delete().no : " + no);
+
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " delete from message where no = ? ";
+		System.out.println("MessageDAO.delete().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setInt(1, no);
+		// 5. 실행
+		int result = pstmt.executeUpdate();
+		// 6. 데이터 표시 / 저장
+		if (result == 1)
+			System.out.println("메시지 삭제 성공");
+		else
+			System.out.println("메시지 삭제 실패");
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt);
+
+		return result;
+	}// end of delete()
+
+}// end of MessageDAO class

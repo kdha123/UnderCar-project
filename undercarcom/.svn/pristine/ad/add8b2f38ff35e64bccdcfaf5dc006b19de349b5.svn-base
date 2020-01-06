@@ -1,0 +1,55 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>메시지 상세보기</title>
+<script type="text/javascript">
+$(function(){
+	// 이전 페이지의 URL 가져오기
+	var referrer =  document.referrer;
+	
+	// URL을 확인 후 받은 메시지 함인지 보낸 메시지 함인지에 따른 ck(check)변수 설정
+	// 받은 메시지함에서의 삭제 요청 시 -> ck = 1 -> list.do로 redirect 
+	if(referrer.indexOf("/list.do") > 0){
+		$("#deleteBtn").click(function(){
+			location = "delete.do?no="+${dto.no }+"&ck=1";
+		});
+	// 보낸 메시지함에서의 삭제 요청 시 -> ck = 0 -> sendlist.do로 redirect 
+	} else if(referrer.indexOf("/sendlist.do") > 0){
+		$("#deleteBtn").click(function(){
+			location = "delete.do?no="+${dto.no }+"&ck=0";
+		});
+	}
+		
+});
+</script>
+</head>
+<body>
+<table class="table">
+	<tr>
+		<th>번호</th><td>${dto.no }</td>
+	</tr>
+	<tr>
+		<th>보낸 사람</th><td>${dto.sender }</td>
+	</tr>
+	<tr>
+		<th>받은 사람</th><td>${dto.accepter }</td>
+	</tr>
+	<tr>
+		<th>보낸 날짜</th><td>${dto.sendDate }</td>
+	</tr>
+	<tr>
+		<th>내용</th><td><pre>${dto.content }</pre></td>
+	</tr>
+	<tr>
+		<td>
+			<button id="deleteBtn">삭제</button>
+			<button onclick="history.back()">목록</button>
+		</td>
+	</tr>
+</table>
+</body>
+</html>

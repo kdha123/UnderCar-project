@@ -1,0 +1,363 @@
+package com.undercar.message.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.undercar.member.dto.LoginDTO;
+import com.undercar.message.dto.MessageDTO;
+import com.undercar.util.db.DBUtil;
+
+public class MessageDAO {
+	
+	// 1. list()
+	public List<MessageDTO> list(LoginDTO loginDTO) throws Exception {
+		System.out.println("MessageDAO.list().loginDTO : "+loginDTO);
+		System.out.println("MessageDAO.list().loginDTO.getId() : "+loginDTO.getId());
+
+		List<MessageDTO> list = null;
+
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " select no, title, sender, accepter, to_char(sendDate, 'yyyy-mm-dd') sendDate "
+				+ " from message where accepter = ? and accdel = 0 order by no desc ";
+		System.out.println("MessageDAO.list().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, loginDTO.getId());
+		// 5. 실행
+		ResultSet rs = pstmt.executeQuery();
+		// 6. 데이터 표시 / 저장
+		if (rs != null) {
+			while (rs.next()) {
+				if (list == null)
+					list = new ArrayList<MessageDTO>();
+				MessageDTO dto = new MessageDTO();
+				dto.setNo(rs.getInt("no"));
+				dto.setTitle(rs.getString("title"));
+				dto.setSender(rs.getString("sender"));
+				dto.setAccepter(rs.getString("accepter"));
+				dto.setSendDate(rs.getString("sendDate"));
+				list.add(dto);
+			} // end of while(rs.next())
+		} // end of if(rs != null)
+		System.out.println("MessageDAO.list().list : " + list);
+
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt, rs);
+
+		return list;
+	}// end of list()
+	
+	// 1-1. sendList()
+	public List<MessageDTO> sendList(LoginDTO loginDTO) throws Exception {
+		System.out.println("MessageDAO.sendList().loginDTO : "+loginDTO);
+		
+		List<MessageDTO> list = null;
+		
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " select no, title, sender, accepter, to_char(sendDate, 'yyyy-mm-dd') sendDate "
+				+ " from message where sender = ? and sendel = 0 and allCheck = 0 order by no desc ";
+		System.out.println("MessageDAO.sendList().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, loginDTO.getId());
+		// 5. 실행
+		ResultSet rs = pstmt.executeQuery();
+		// 6. 데이터 표시 / 저장
+		if (rs != null) {
+			while (rs.next()) {
+				if (list == null)
+					list = new ArrayList<MessageDTO>();
+				MessageDTO dto = new MessageDTO();
+				dto.setNo(rs.getInt("no"));
+				dto.setTitle(rs.getString("title"));
+				dto.setSender(rs.getString("sender"));
+				dto.setAccepter(rs.getString("accepter"));
+				dto.setSendDate(rs.getString("sendDate"));
+				list.add(dto);
+			} // end of while(rs.next())
+		} // end of if(rs != null)
+		System.out.println("MessageDAO.sendList().list : " + list);
+		
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt, rs);
+		
+		return list;
+	}// end of sendList()
+	
+	// 1-2. noAccList()
+	public List<MessageDTO> noAccList(LoginDTO loginDTO) throws Exception {
+		System.out.println("MessageDAO.noAccList().loginDTO : "+loginDTO);
+		
+		List<MessageDTO> list = null;
+		
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " select no, title, sender, accepter, to_char(sendDate, 'yyyy-mm-dd') sendDate "
+				+ " from message where accepter = ? and accdel = 0 and acceptDate is null order by no desc ";
+		System.out.println("MessageDAO.noAccList().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, loginDTO.getId());
+		// 5. 실행
+		ResultSet rs = pstmt.executeQuery();
+		// 6. 데이터 표시 / 저장
+		if (rs != null) {
+			while (rs.next()) {
+				if (list == null)
+					list = new ArrayList<MessageDTO>();
+				MessageDTO dto = new MessageDTO();
+				dto.setNo(rs.getInt("no"));
+				dto.setTitle(rs.getString("title"));
+				dto.setSender(rs.getString("sender"));
+				dto.setAccepter(rs.getString("accepter"));
+				dto.setSendDate(rs.getString("sendDate"));
+				list.add(dto);
+			} // end of while(rs.next())
+		} // end of if(rs != null)
+		System.out.println("MessageDAO.noAccList().list : " + list);
+		
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt, rs);
+		
+		return list;
+	}// end of noAccList()
+	
+	// 1-3. allWriteList()
+	public List<MessageDTO> allWriteList(LoginDTO loginDTO) throws Exception {
+		System.out.println("MessageDAO.allWriteList().loginDTO : "+loginDTO);
+		
+		List<MessageDTO> list = null;
+		
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " select distinct title, sender, to_char(sendDate, 'yyyy-mm-dd') sendDate from"
+				+ " (select no, title, sender, sendDate from message where(sendel = 0 and allCheck = 1)) " + 
+				"order by sendDate desc ";
+		System.out.println("MessageDAO.allWriteList().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		// 5. 실행
+		ResultSet rs = pstmt.executeQuery();
+		// 6. 데이터 표시 / 저장
+		if (rs != null) {
+			while (rs.next()) {
+				if (list == null)
+					list = new ArrayList<MessageDTO>();
+				MessageDTO dto = new MessageDTO();
+				dto.setNo(rs.getInt("no"));
+				dto.setTitle(rs.getString("title"));
+				dto.setSender(rs.getString("sender"));
+//				dto.setAccepter(rs.getString("accepter"));
+				dto.setSendDate(rs.getString("sendDate"));
+				list.add(dto);
+			} // end of while(rs.next())
+		} // end of if(rs != null)
+		System.out.println("MessageDAO.allWriteList().list : " + list);
+		
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt, rs);
+		
+		return list;
+	}// end of allWriteList()
+
+	// 2. view()
+	public MessageDTO view(int no) throws Exception {
+		System.out.println("MessageDAO.view().no : " + no);
+
+		MessageDTO dto = null;
+
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " select no, title, content, sender, accepter, sendDate, acceptDate, sendel, accdel "
+				+ " from message where no = ? ";
+		System.out.println("MessageDAO.view().sql : " + sql);
+		// 4. 실행 객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setInt(1, no);
+		// 5. 실행
+		ResultSet rs = pstmt.executeQuery();
+		// 6. 데이터 표시 / 저장
+		if (rs != null && rs.next()) {
+			dto = new MessageDTO();
+			dto.setNo(rs.getInt("no"));
+			dto.setTitle(rs.getString("title"));
+			dto.setContent(rs.getString("content"));
+			dto.setSender(rs.getString("sender"));
+			dto.setAccepter(rs.getString("accepter"));
+			dto.setSendDate(rs.getString("sendDate"));
+			dto.setAcceptDate(rs.getString("acceptDate"));
+			dto.setSendel(rs.getInt("sendel"));
+			dto.setAccdel(rs.getInt("accdel"));
+		} // end of if
+		System.out.println("MessageDAO.view().dto : " + dto);
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt, rs);
+
+		return dto;
+	}// end of view()
+	
+	// 2-1 acceptDate Update method
+	public void accDateUpate(int no) throws Exception {
+		System.out.println("MessageDAO.accDateUpate().no: " + no);
+		
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " update message set acceptDate = sysdate where no = ? ";
+		System.out.println("MessageDAO.accDateUpate().sql: " + sql);
+		// 4. 실행 객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setInt(1, no);
+		// 5. 실행
+		int result = pstmt.executeUpdate();
+		// 6. 데이터 표시 / 저장
+		if(result == 1)
+			System.out.println("읽은 날짜 update 성공");
+		else System.out.println("읽은 날짜 update 실패");
+		
+	}// end of accDateUpate()
+
+	// 3. write
+	public int write(MessageDTO dto) throws Exception {
+		System.out.println("MessageDAO.write().dto : " + dto);
+
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " insert into message(no, title, content, sender, accepter)"
+				+ " values(message_seq.nextval, ?, ?, ?, ?) ";
+		System.out.println("MessageDAO.write().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, dto.getTitle());
+		pstmt.setString(2, dto.getContent());
+		pstmt.setString(3, dto.getSender());
+		pstmt.setString(4, dto.getAccepter());
+		// 5. 실행
+		int result = pstmt.executeUpdate();
+		// 6. 데이터 표시 / 저장
+		if (result == 1)
+			System.out.println("메시지 보내기 성공");
+		else
+			System.out.println("메시지 보내기 실패");
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt);
+
+		return result;
+	}// end of write()
+	
+	// 3-1. 전체 회원에게 글쓰기 method
+	public int allWrite(MessageDTO dto) throws Exception {
+		System.out.println("MessageDAO.allWrite().dto : " + dto);
+		
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " insert into message(no, title, content, sender, accepter, allCheck)"
+				+ " values(message_seq.nextval, ?, ?, ?, ?, 1) ";
+		System.out.println("MessageDAO.allWrite().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, dto.getTitle());
+		pstmt.setString(2, dto.getContent());
+		pstmt.setString(3, dto.getSender());
+		pstmt.setString(4, dto.getAccepter());
+		// 5. 실행
+		int result = pstmt.executeUpdate();
+		// 6. 데이터 표시 / 저장
+		if (result == 1)
+			System.out.println("메시지 allWrite 성공");
+		else
+			System.out.println("메시지 allWrite 실패");
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt);
+		
+		return result;
+	}// end of updateAllCheck()
+
+	// 4. accUpdate
+	public int accUpdate(int no) throws Exception {
+		System.out.println("MessageDAO.accUpdate().no : " + no);
+		
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " update message set accdel = 1 where no = ? ";
+		System.out.println("MessageDAO.accUpdate().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setInt(1, no);
+		// 5. 실행
+		int result = pstmt.executeUpdate();
+		// 6. 데이터 표시 / 저장
+		if (result == 1)
+			System.out.println("메시지 accUpdate 성공");
+		else
+			System.out.println("메시지 accUpdate 실패");
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt);
+		
+		return result;
+	}// end of accUpdate()
+	
+	// 5. senUpdate
+	public int senUpdate(int no) throws Exception {
+		System.out.println("MessageDAO.senUpdate().no : " + no);
+		
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " update message set sendel = 1 where no = ? ";
+		System.out.println("MessageDAO.senUpdate().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setInt(1, no);
+		// 5. 실행
+		int result = pstmt.executeUpdate();
+		// 6. 데이터 표시 / 저장
+		if (result == 1)
+			System.out.println("메시지 senUpdate 성공");
+		else
+			System.out.println("메시지 senUpdate 실패");
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt);
+		
+		return result;
+	}// end of senUpdate()
+	
+	// 6. delete
+	public int delete(int no) throws Exception {
+		System.out.println("MessageDAO.delete().no : " + no);
+
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " delete from message where no = ? ";
+		System.out.println("MessageDAO.delete().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setInt(1, no);
+		// 5. 실행
+		int result = pstmt.executeUpdate();
+		// 6. 데이터 표시 / 저장
+		if (result == 1)
+			System.out.println("메시지 삭제 성공");
+		else
+			System.out.println("메시지 삭제 실패");
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt);
+
+		return result;
+	}// end of delete()
+
+}// end of MessageDAO class

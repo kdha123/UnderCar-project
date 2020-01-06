@@ -1,0 +1,39 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<%
+
+String title = request.getParameter("title");
+int a=title.lastIndexOf("]");
+String b=title.substring(a+1);
+
+%>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>faq 글쓰기</title>
+</head>
+<body>
+
+<h1 align="center"> faq 등록</h1>
+
+<form action="write.do" method="post" id="writeForm">
+
+<div class="form-group">
+<label for="title">제목</label>
+<input type="text" class="form-control" id="title" name="title" title="제목은 2글자 이상 입력해야합니다" value=<%=b%>>
+
+</div>
+<div class="form-group">
+<label for="content">내용</label>
+</div>
+
+<div class="form-group">
+<textarea class="form-control" rows="10" cols="130" id="content" name="content">${param.content!=null?param.content:'' }</textarea>
+</div>
+		<button>등록</button>
+		<button type="reset">다시입력</button>
+		<button type="button" onclick="history.back()">취소</button>
+</form>
+</body>
+</html>

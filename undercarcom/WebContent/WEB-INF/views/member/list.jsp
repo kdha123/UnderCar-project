@@ -1,0 +1,97 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="tl" tagdir="/WEB-INF/tags" %>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>회원 리스트</title>
+<style type="text/css">
+.dataRow:hover {
+	background: #eee;
+	cursor: pointer;
+}
+</style>
+<script type="text/javascript">
+	$(function() {
+		$(".pagination > li:not('.active')").click(function(){
+			var page = $(this).data("page");
+			location = "list.do?page="+page+"&perPageNum=${pageObject.perPageNum}"+ "&key=${pageObject.key}"
+			+ "&word=${pageObject.word}";
+			return false;
+		});
+		$("li.active").click(function(){
+			return false;
+		});
+	});
+</script>
+</head>
+<body>
+	<div class="container">
+	<h2>회원리스트</h2>
+	<div id="searchDiv">
+			<form action="list.do" class="form-inline">
+				<input name="page" value="1" type="hidden" />
+				<div class="form-group">
+					<select class="form-control" id="key" name="key">
+						<option value="t" ${(param.key == "t")?"selected":"" }>아이디</option>
+						<option value="c" ${(param.key == "c")?"selected":"" }>이름</option>
+						<option value="w" ${(param.key == "w")?"selected":"" }>연락처</option>
+						<option value="tc" ${(param.key == "tc")?"selected":"" }>아이디/이름</option>
+						<option value="tw" ${(param.key == "tw")?"selected":"" }>아이디/연락처</option>
+						<option value="cw" ${(param.key == "cw")?"selected":"" }>이름/연락처</option>
+						<option value="tcw" ${(param.key == "tcw")?"selected":"" }>전체</option>
+					</select>
+				</div>
+				<div class="input-group">
+					<input type="text" class="form-control" placeholder="Search"
+						name="word" value="${param.word }" id="word">
+					<div class="input-group-btn">
+						<button class="btn btn-default" type="submit">
+							<i class="glyphicon glyphicon-search"></i>
+						</button>
+					</div>
+				</div>
+				<div class="input-group right">
+						<span class="input-group-addon">Rows/Page</span>
+					  <select class="form-control" id="perPageRow">
+					    <option ${(pageObject.perPageNum == 10)?"selected='selected'":"" }>10</option>
+					    <option ${(pageObject.perPageNum == 15)?"selected='selected'":"" }>15</option>
+					    <option ${(pageObject.perPageNum == 20)?"selected='selected'":"" }>20</option>
+					    <option ${(pageObject.perPageNum == 25)?"selected='selected'":"" }>25</option>
+					  </select>
+					</div>
+			</form>
+		</div>
+		<table class="table">
+			<tr>
+				<th>아이디</th>
+				<th>이름</th>
+				<th>생년월일</th>
+				<th>성별</th>
+				<th>연락처</th>
+				<th>회원등급</th>
+			</tr>
+			<c:forEach items="${list }" var="dto">
+				<tr class="dataRow">
+					<td class="no">${dto.id }</td>
+					<td>${dto.name }</td>
+					<td>${dto.birth }</td>
+					<td>${dto.gender }</td>
+					<td>${dto.tel }</td>
+					<td>${dto.grade }</td>
+				</tr>
+			</c:forEach>
+			<!-- 페이지를 이동시키는 페이지네이션 -->
+			<tr>
+			<td colspan="6">
+				<tl:pageNav  page="${pageObject.page }"
+			 	startPage="${pageObject.startPage }" endPage="${pageObject.endPage }" 
+			 	totalPage="${pageObject.totalPage }" />
+				</td>
+			</tr>
+		</table>
+	</div>
+</body>
+</html>

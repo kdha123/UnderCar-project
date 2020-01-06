@@ -1,0 +1,916 @@
+package com.undercar.sell.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.undercar.attachment.dto.AttachmentDTO;
+import com.undercar.carbrand.dto.CarBrandDTO;
+import com.undercar.carclass.dto.CarClassDTO;
+import com.undercar.caritems.dto.CarItemsDTO;
+import com.undercar.caroption.dto.CarOptionDTO;
+import com.undercar.category.dto.CategoryDTO;
+import com.undercar.gmmodel.dto.GmModelDTO;
+import com.undercar.hmodel.dto.HModelDTO;
+import com.undercar.kmodel.dto.KModelDTO;
+import com.undercar.sell.dto.SellDTO;
+import com.undercar.sellList.dto.SellListDTO;
+import com.undercar.sellList.dto.SellViewListDTO;
+import com.undercar.smodel.dto.SModelDTO;
+import com.undercar.ssmodel.dto.SSModelDTO;
+import com.undercar.util.db.DBUtil;
+import com.undercar.util.page.PageObject;
+
+public class SellDAO {
+
+	public List<Object> list(PageObject pageObject)throws Exception{
+		
+		System.out.println("SellDAO.list()");
+		
+		List<Object> list = null;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select s.no, a.file1, s.condition, c.spec, c.distance, c.grade, c.year, c.location, c.price "
+				+ " from sell s, attachment a, category c "
+				+ " where (s.no = a.sell_no) and (c.sell_no = s.no) " 
+				+ " order by s.no desc, s.condition desc ";
+		
+		// 검색 sql 부분
+		
+		//페이징 처리 부분
+//		sql += " select rownum rnum, s.no, a.file1, s.condition, c.model, c.distance, c.grade, c.year, c.location, c.price "
+//				+ " from (" + sql + ") ";
+//		
+//		sql += " select * from (" + sql + ") "
+//				+ " where rnum between ? and ? ";
+		System.out.println("SellDAO.list().sql:" + sql);
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		int idx = 1;
+		// 검색
+//		idx = SerchCondition.setPreparedStatement(pstmt, pageObject, idx);
+		
+		//페이징 처리 부분
+//		PageObject pageObject = new PageObject();
+//		pstmt.setInt(idx++, pageObject.getStartRow());
+//		pstmt.setInt(idx++, pageObject.getEndRow());
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null) {
+			while(rs.next()) {
+				if(list == null) list = new ArrayList<Object>();
+				
+				SellListDTO dto = new SellListDTO();
+//				AttachmentDTO adto = new AttachmentDTO();
+//				CategoryDTO cdto = new CategoryDTO();
+				dto.setNo(rs.getInt("no"));
+				dto.setFile1(rs.getString("file1"));
+				dto.setCondition(rs.getInt("condition"));
+				dto.setSpec(rs.getString("spec"));
+				dto.setDistance(rs.getInt("distance"));
+				dto.setGrade(rs.getString("grade"));
+				dto.setYear(rs.getString("year"));
+				dto.setLocation(rs.getString("location"));
+				dto.setPrice(rs.getInt("price"));
+				list.add(dto);
+//				list.add(adto);
+//				list.add(cdto);
+			}// end of while
+		}// end of if
+		DBUtil.close(con, pstmt, rs);
+		
+		System.out.println("SellDAO.list().list:" + list);
+		
+		return list;
+		
+	}// end of list
+	
+	public List<Object> schList(PageObject pageObject, String[] condition)throws Exception{
+		System.out.println("SellDAO.schList()");
+		
+		String brand = condition[0];
+		String model = condition[1];
+		String year = condition[2];
+		String grade = condition[3];
+		String spec = condition[4];
+		
+		List<Object> list = null;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select s.no, a.file1, s.condition, c.spec, c.distance, c.grade, c.year, c.location, c.price " + 
+				" from sell s, attachment a, category c " + 
+				" where (s.no = a.sell_no) and (c.sell_no = s.no and c.brand=? and c.model=? and c.year=? " + 
+				" and c.grade=? and c.spec=?) ";
+		sql += " order by s.no desc, s.condition desc ";
+//		페이징 처리 부분
+		sql = " select rownum rnum, no, file1, condition, spec, distance, grade, year, location, price "
+				+ " from (" + sql + ") ";
+		sql = " select * from (" + sql + ") "
+				+ " where rnum between ? and ? ";
+		System.out.println("SellDAO.schList().sql : " + sql);
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, brand);
+		pstmt.setString(2, model);
+		pstmt.setString(3, year);
+		pstmt.setString(4, grade);
+		pstmt.setString(5, spec);
+		pstmt.setInt(6, pageObject.getStartRow());
+		pstmt.setInt(7, pageObject.getEndRow());
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null) {
+			while(rs.next()) {
+				if(list == null) list = new ArrayList<Object>();
+				
+				SellListDTO dto = new SellListDTO();
+//				AttachmentDTO adto = new AttachmentDTO();
+//				CategoryDTO cdto = new CategoryDTO();
+				dto.setNo(rs.getInt("no"));
+				dto.setFile1(rs.getString("file1"));
+				dto.setCondition(rs.getInt("condition"));
+				dto.setSpec(rs.getString("spec"));
+				dto.setDistance(rs.getInt("distance"));
+				dto.setGrade(rs.getString("grade"));
+				dto.setYear(rs.getString("year"));
+				dto.setLocation(rs.getString("location"));
+				dto.setPrice(rs.getInt("price"));
+				list.add(dto);
+//				list.add(adto);
+//				list.add(cdto);
+			}// end of while
+		}// end of if
+		DBUtil.close(con, pstmt, rs);
+		
+		System.out.println("SellDAO.list().list:" + list);
+		
+		return list;
+		
+	}// end of list
+	
+	public int getTotalRow(PageObject pageObject)throws Exception{
+		
+		System.out.println("SellDAO.getTotal?Row()");
+		
+		int totalRow = 0;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select count (*) cnt from sell ";
+	
+//		 검색
+//		sql += SearchCondition.getSearchSQLWithWhere(pageObject);
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		int idx = 1 ;
+		
+		// 검색
+//		idx = SearchCondition.getPreparedStatement(pstmt, pageObject, idx);
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null && rs.next()) {
+			
+			totalRow = rs.getInt("cnt");
+		}// end of if
+		
+		return totalRow;
+	}// end of getTotalRow
+	
+	public int sellWrite(SellDTO dto)throws Exception{
+		
+		System.out.println("SellDAO.write().dto" + dto);
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql1 = " insert into sell(no, content, writer) "
+				+ " values(sell_seq.nextval, ?, ?) ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql1);
+		
+		System.out.println("SellDAO.sellWrite().sql1:"+sql1);
+		pstmt.setString(1, dto.getContent());
+		pstmt.setString(2, dto.getWriter());
+		
+		int result = pstmt.executeUpdate();
+				
+		System.out.println("글쓰기 성공");
+		
+		DBUtil.close(con, pstmt);
+		
+		return result;
+		
+	}// end of write
+				
+	public int attachmentWrite(AttachmentDTO adto)throws Exception{
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sell_noSql = "select no from sell where no=(select max(no)as no from sell) ";
+		int sellNo = 0;
+		PreparedStatement pstmt = con.prepareStatement(sell_noSql);
+		
+		ResultSet rs = pstmt.executeQuery();
+		if(rs != null && rs.next()) {
+			sellNo = rs.getInt("no");
+		}
+		
+		String sql2 = " insert into attachment( no, sell_no, file1, file2, file3, file4, file5, file6, file7, file8, file9, file10, "
+				+ " file11, file12, file13, file14, file15, file16, file17, file18, file19, file20) "
+				+ " values(attachment_seq.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		//                                         1              6             11             16              21
+		
+		pstmt = con.prepareStatement(sql2);
+		
+		pstmt.setInt(1, sellNo);
+		pstmt.setString(2, adto.getFile1());
+		pstmt.setString(3, adto.getFile2());
+		pstmt.setString(4, adto.getFile3());
+		pstmt.setString(5, adto.getFile4());
+		pstmt.setString(6, adto.getFile5());
+		pstmt.setString(7, adto.getFile6());
+		pstmt.setString(8, adto.getFile7());
+		pstmt.setString(9, adto.getFile8());
+		pstmt.setString(10, adto.getFile9());
+		pstmt.setString(11, adto.getFile10());
+		pstmt.setString(12, adto.getFile11());
+		pstmt.setString(13, adto.getFile12());
+		pstmt.setString(14, adto.getFile13());
+		pstmt.setString(15, adto.getFile14());
+		pstmt.setString(16, adto.getFile15());
+		pstmt.setString(17, adto.getFile16());
+		pstmt.setString(18, adto.getFile17());
+		pstmt.setString(19, adto.getFile18());
+		pstmt.setString(20, adto.getFile19());
+		pstmt.setString(21, adto.getFile20());
+		
+		int result = pstmt.executeUpdate();
+		
+		DBUtil.close(con, pstmt, rs);
+		
+		return result;
+		
+	}// end of attachmentWrite
+		
+		
+		
+	public int categoryWrite(CategoryDTO cdto)throws Exception{
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sell_noSql = "select no from sell where no=(select max(no)as no from sell) ";
+		int sellNo = 0;
+		
+		PreparedStatement pstmt = con.prepareStatement(sell_noSql);
+		ResultSet rs = pstmt.executeQuery();
+		if(rs != null && rs.next()) {
+			sellNo = rs.getInt("no");
+		}
+		
+		String sql3 = " insert into category(no, sell_no, distance, price, model, brand, grade, year, location, fuel, "
+		+ " carnumber, carclass, spec, color, trans) "
+		+ " values(category_seq.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+		//                       1              6             11          15
+		pstmt = con.prepareStatement(sql3);
+		
+		pstmt.setInt(1, sellNo);
+		pstmt.setInt(2, cdto.getDistance());
+		pstmt.setInt(3, cdto.getPrice());
+		pstmt.setString(4, cdto.getModel());
+		pstmt.setString(5, cdto.getBrand());
+		pstmt.setString(6, cdto.getGrade());
+		pstmt.setString(7, cdto.getYear());
+		pstmt.setString(8, cdto.getLocation());
+		pstmt.setString(9, cdto.getFuel());
+		pstmt.setString(10, cdto.getCarnumber());
+		pstmt.setString(11, cdto.getCarclass());
+		pstmt.setString(12, cdto.getSpec());
+		pstmt.setString(13, cdto.getColor());
+		pstmt.setString(14, cdto.getTrans());
+		
+		int result = pstmt.executeUpdate();
+		
+		DBUtil.close(con, pstmt, rs);
+		
+		return result;
+		
+	}//end of categoryWrite()
+	public int caroptionWrite(CarOptionDTO codto)throws Exception{
+	
+		Connection con = DBUtil.getConnection();
+		
+		String sell_noSql = "select no from sell where no=(select max(no)as no from sell) ";
+		int sellNo = 0;
+
+		PreparedStatement pstmt = con.prepareStatement(sell_noSql);
+		
+		ResultSet rs = pstmt.executeQuery();
+		if(rs != null && rs.next()) {
+			sellNo = rs.getInt("no");
+		}
+		
+		String sql4 = " insert into caroption(no, sell_no, navi, sun, smart, wind, cruz, handle, ldws, aeb, airbag, mirror, "
+				+ " tpms, trunk, autolight, wipper, parking, hot, bluetooth, hipass, sheet, wheel, pano, ledlight, airsus, ctcontent) "
+				+ " values(caroption_seq.nextval, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+		//                           1              6             11             16             21       24
+		
+		pstmt = con.prepareStatement(sql4);
+		
+		pstmt.setInt(1, sellNo);
+		pstmt.setInt(2, codto.getNavi());
+		pstmt.setInt(3, codto.getSun());
+		pstmt.setInt(4, codto.getSmart());
+		pstmt.setInt(5, codto.getWind());
+		pstmt.setInt(6, codto.getCruz());
+		pstmt.setInt(7, codto.getHandle());
+		pstmt.setInt(8, codto.getLdws());
+		pstmt.setInt(9, codto.getAeb());
+		pstmt.setInt(10, codto.getAirbag());
+		pstmt.setInt(11, codto.getMirror());
+		pstmt.setInt(12, codto.getTpms());
+		pstmt.setInt(13, codto.getTrunk());
+		pstmt.setInt(14, codto.getAutolight());
+		pstmt.setInt(15, codto.getWipper());
+		pstmt.setInt(16, codto.getParking());
+		pstmt.setInt(17, codto.getHot());
+		pstmt.setInt(18, codto.getBluetooth());
+		pstmt.setInt(19, codto.getHipass());
+		pstmt.setInt(20, codto.getSheet());
+		pstmt.setInt(21, codto.getWheel());
+		pstmt.setInt(22, codto.getPano());
+		pstmt.setInt(23, codto.getLedlight());
+		pstmt.setInt(24, codto.getAirsus());
+		pstmt.setString(25, codto.getCtcontent());
+		
+		int result = pstmt.executeUpdate();
+		
+		DBUtil.close(con, pstmt, rs);
+		
+		return result;
+		
+	}
+	
+	public List<Object> carYearList(String model)throws Exception{
+		
+		List<Object> carYearList = null;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select distinct year from caritems where model = ? ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, model);
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null)
+			while(rs.next()) {
+				if(carYearList == null) carYearList = new ArrayList<Object>();
+				
+				CarItemsDTO cidto = new CarItemsDTO();
+				
+				cidto.setYear(rs.getString("year"));
+				
+				carYearList.add(cidto);
+			}
+		DBUtil.close(con, pstmt, rs);
+		System.out.println("SellDAO.carYearList().list : "+carYearList);
+		
+		return carYearList;
+	}// end of carYearList()
+	
+	public List<Object> carGradeList(String year)throws Exception{
+		
+		List<Object> carGradeList = null;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select distinct grade from caritems where year = ? ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, year);
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null)
+			while(rs.next()) {
+				if(carGradeList == null) carGradeList = new ArrayList<Object>();
+				
+				CarItemsDTO cidto = new CarItemsDTO();
+				
+				cidto.setGrade(rs.getString("grade"));
+				
+				carGradeList.add(cidto);
+			}
+		DBUtil.close(con, pstmt, rs);
+		System.out.println("SellDAO.carGrade().list : "+carGradeList);
+		
+		return carGradeList;
+	}//end of carGradeList
+		
+	public List<Object> carSpecList(String carGrade)throws Exception{
+			
+		List<Object> carSpecList = null;
+			
+		Connection con = DBUtil.getConnection();
+			
+		String sql = " select distinct spec from caritems where grade = ? ";
+			
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, carGrade);
+			
+		ResultSet rs = pstmt.executeQuery();
+			
+		if(rs != null)
+			while(rs.next()) {
+				if(carSpecList == null) carSpecList = new ArrayList<Object>();
+					
+				CarItemsDTO cidto = new CarItemsDTO();
+					
+				cidto.setSpec(rs.getString("spec"));
+					
+				carSpecList.add(cidto);
+			}
+		DBUtil.close(con, pstmt, rs);
+		System.out.println("SellDAO.carGrade().list : "+carSpecList);
+			
+			return carSpecList; 
+	}// end of carSpecList()
+	
+	public List<Object> carBrandList()throws Exception{
+		List<Object> carBrandList = null;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select no, brand "
+				+ " from carbrand ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null)
+			while(rs.next()) {
+				if(carBrandList == null) carBrandList = new ArrayList<Object>();
+				
+				CarBrandDTO bdto = new CarBrandDTO();
+				
+				bdto.setNo(rs.getInt("no"));
+				bdto.setBrand(rs.getString("brand"));
+				
+				carBrandList.add(bdto);
+			}
+		DBUtil.close(con, pstmt, rs);
+		
+		return carBrandList;
+	}
+	
+	public List<Object> carClassList()throws Exception{
+		List<Object> carClassList = null;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select no, carclass "
+				+ " from carclass ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null)
+			while(rs.next()) {
+				if(carClassList == null) carClassList = new ArrayList<Object>();
+				
+				CarClassDTO ccdto = new CarClassDTO();
+				
+				ccdto.setNo(rs.getInt("no"));
+				ccdto.setCarclass(rs.getString("carclass"));
+				
+				carClassList.add(ccdto);
+			}
+		DBUtil.close(con, pstmt, rs);
+		
+		return carClassList;
+	}
+	
+	public List<Object> gmModelList()throws Exception{
+		List<Object> gmModelList = null;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select no, model "
+				+ " from gmmodel ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null)
+			while(rs.next()) {
+				if(gmModelList == null) gmModelList = new ArrayList<Object>();
+				
+				GmModelDTO dto = new GmModelDTO();
+				
+				dto.setNo(rs.getInt("no"));
+				dto.setModel(rs.getString("model"));
+				
+				gmModelList.add(dto);
+			}
+		DBUtil.close(con, pstmt, rs);
+		
+		return gmModelList;
+	}
+	
+	public List<Object> hModelList()throws Exception{
+		List<Object> hModelList = null;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select no, model "
+				+ " from hmodel ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null)
+			while(rs.next()) {
+				if(hModelList == null) hModelList = new ArrayList<Object>();
+				
+				HModelDTO hdto = new HModelDTO();
+				
+				hdto.setNo(rs.getInt("no"));
+				hdto.setModel(rs.getString("model"));
+				
+				hModelList.add(hdto);
+			}
+		DBUtil.close(con, pstmt, rs);
+		
+		return hModelList;
+	}
+	
+	public List<Object> kModelList()throws Exception{
+		List<Object> kModelList = null;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select no, model "
+				+ " from kmodel ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null)
+			while(rs.next()) {
+				if(kModelList == null) kModelList = new ArrayList<Object>();
+				
+				KModelDTO kdto = new KModelDTO();
+				
+				kdto.setNo(rs.getInt("no"));
+				kdto.setModel(rs.getString("model"));
+				
+				kModelList.add(kdto);
+			}
+		DBUtil.close(con, pstmt, rs);
+		
+		return kModelList;
+	}
+	
+	public List<Object> sModelList()throws Exception{
+		List<Object> sModelList = null;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select no, model "
+				+ " from smodel ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null)
+			while(rs.next()) {
+				if(sModelList == null) sModelList = new ArrayList<Object>();
+				
+				SModelDTO dto = new SModelDTO();
+				
+				dto.setNo(rs.getInt("no"));
+				dto.setModel(rs.getString("model"));
+				
+				sModelList.add(dto);
+			}
+		DBUtil.close(con, pstmt, rs);
+		
+		return sModelList;
+	}
+	
+	public List<Object> ssModelList()throws Exception{
+		List<Object> ssModelList = null;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select no, model "
+				+ " from ssmodel ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null)
+			while(rs.next()) {
+				if(ssModelList == null) ssModelList = new ArrayList<Object>();
+				
+				SSModelDTO dto = new SSModelDTO();
+				
+				dto.setNo(rs.getInt("no"));
+				dto.setModel(rs.getString("model"));
+				
+				ssModelList.add(dto);
+			}
+		DBUtil.close(con, pstmt, rs);
+		
+		return ssModelList;
+	}
+	
+	public List<Object> categoryList()throws Exception{
+		
+		List<Object> categoryList = null;
+		
+		CategoryDTO cdto = new CategoryDTO();
+		
+		SellDTO dto = new SellDTO();
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select s.no, c.year, c.grade, c.distance, c.price, c.sell_no from category c, sell s"
+				+ " where s.no = c.sell_no ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		ResultSet rs = pstmt.executeQuery();
+
+		if(rs != null) {
+			while(rs.next()) {
+				if(categoryList == null) categoryList = new ArrayList<Object>();
+				
+				dto.setNo(rs.getInt("no"));
+				cdto.setYear(rs.getString("year"));
+				cdto.setGrade(rs.getString("grade"));
+				cdto.setDistance(rs.getInt("distance"));
+				cdto.setPrice(rs.getInt("price"));
+				cdto.setSell_no(rs.getInt("sell_no"));
+				
+				categoryList.add(dto);
+				categoryList.add(cdto);
+			}
+		}
+		DBUtil.close(con, pstmt, rs);
+		
+		
+		return categoryList;
+	}
+	
+public Object sellView(int no)throws Exception{
+		
+		SellViewListDTO dto = null;
+		Connection con = DBUtil.getConnection();
+		
+		String sql = "select s.no, s.content, s.writeDate, s.hit, s.writer, s.condition, "
+				+ " a.file1, a.file2, a.file3, a.file4, a.file5, a.file6, a.file7, a.file8, a.file9, a.file10, "
+				+ " a.file11, a.file12, a.file13, a.file14, a.file15, a.file16, a.file17, a.file18, a.file19, a.file20, "
+				+ " c.navi, c.sun, c.smart, c.wind, c.cruz, c.handle, c.ldws, c.aeb, c.airbag, c.mirror, "
+				+ " c.tpms, c.trunk, c.autolight, c.wipper, c.parking, c.hot, c.bluetooth, c.hipass, c.sheet, c.wheel, c.pano, c.ledlight, c.airsus, c.ctcontent, "
+				+ " t.model, t.brand, t.grade, t.distance, t.year, t.price, t.location, t.fuel, t.sell_no, t.carnumber, t.carclass, t.spec, t.color, t.trans "
+				+ " from sell s, attachment a, caroption c, category t "
+				+ " where (s.no = a.sell_no) and (s.no = c.sell_no) and (s.no = t.sell_no) and (s.no = ?) ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		pstmt.setInt(1, no);
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null && rs.next()) {
+			
+			dto = new SellViewListDTO();
+			
+			dto.setNo(rs.getInt("no"));
+			dto.setContent(rs.getString("content"));
+			dto.setWriteDate(rs.getString("writeDate"));
+			dto.setHit(rs.getInt("hit"));
+			dto.setWriter(rs.getString("writer"));
+			dto.setCondition(rs.getInt("condition"));
+			dto.setGrade(rs.getString("grade"));
+			dto.setFile1(rs.getString("file1"));
+			dto.setFile2(rs.getString("file2"));
+			dto.setFile3(rs.getString("file3"));
+			dto.setFile4(rs.getString("file4"));
+			dto.setFile5(rs.getString("file5"));
+			dto.setFile6(rs.getString("file6"));
+			dto.setFile7(rs.getString("file7"));
+			dto.setFile8(rs.getString("file8"));
+			dto.setFile9(rs.getString("file9"));
+			dto.setFile10(rs.getString("file10"));
+			dto.setFile11(rs.getString("file11"));
+			dto.setFile12(rs.getString("file12"));
+			dto.setFile13(rs.getString("file13"));
+			dto.setFile14(rs.getString("file14"));
+			dto.setFile15(rs.getString("file15"));
+			dto.setFile16(rs.getString("file16"));
+			dto.setFile17(rs.getString("file17"));
+			dto.setFile18(rs.getString("file18"));
+			dto.setFile19(rs.getString("file19"));
+			dto.setFile20(rs.getString("file20"));
+			dto.setNavi(rs.getInt("navi"));
+			dto.setSun(rs.getInt("sun"));
+			dto.setSmart(rs.getInt("smart"));
+			dto.setWind(rs.getInt("wind"));
+			dto.setCruz(rs.getInt("cruz"));
+			dto.setHandle(rs.getInt("handle"));
+			dto.setLdws(rs.getInt("ldws"));
+			dto.setAeb(rs.getInt("aeb"));
+			dto.setAirbag(rs.getInt("airbag"));
+			dto.setMirror(rs.getInt("mirror"));
+			dto.setTpms(rs.getInt("tpms"));
+			dto.setTrunk(rs.getInt("trunk"));
+			dto.setAutolight(rs.getInt("autolight"));
+			dto.setWipper(rs.getInt("wipper"));
+			dto.setParking(rs.getInt("parking"));
+			dto.setHot(rs.getInt("hot"));
+			dto.setBluetooth(rs.getInt("bluetooth"));
+			dto.setHipass(rs.getInt("hipass"));
+			dto.setSheet(rs.getInt("sheet"));
+			dto.setWheel(rs.getInt("wheel"));
+			dto.setPano(rs.getInt("pano"));
+			dto.setLedlight(rs.getInt("ledlight"));
+			dto.setAirsus(rs.getInt("airsus"));
+			dto.setModel(rs.getString("model"));
+			dto.setBrand(rs.getString("brand"));
+			dto.setGrade(rs.getString("grade"));
+			dto.setDistance(rs.getInt("distance"));
+			dto.setYear(rs.getString("year"));
+			dto.setPrice(rs.getInt("price"));
+			dto.setLocation(rs.getString("location"));
+			dto.setFuel(rs.getString("fuel"));
+			dto.setCarnumber(rs.getString("carnumber"));
+			dto.setCarclass(rs.getString("carclass"));
+			dto.setSpec(rs.getString("spec"));
+			dto.setColor(rs.getString("color"));
+			dto.setTrans(rs.getString("trans"));
+			dto.setCtcontent(rs.getString("ctcontent"));
+			
+		}
+		
+		System.out.println("View.dto==================================");
+		System.out.println(dto);
+		DBUtil.close(con, pstmt, rs);
+		
+		return dto;
+		
+	}
+	
+	public int sellDelete(int no)throws Exception{
+		
+		System.out.println("sellDAO.delete no:"+no);
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " delete from sell where no=? ";
+		
+		//sell data delete
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		pstmt.setInt(1, no);
+
+		System.out.println("delete.sql :" + sql);
+		
+		int result = pstmt.executeUpdate();
+				
+		DBUtil.close(con, pstmt);
+		
+		System.out.println("글삭제 성공");
+		
+		return result;
+	}//end of delete
+	
+	public int attachmentDelete(int no)throws Exception{
+		
+		System.out.println("sellDAO.attachmentdelete no:"+no);
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " delete from attachment where sell_no=? ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		//attachment data delete
+		pstmt.setInt(1, no);		
+		
+		int result = pstmt.executeUpdate();
+		
+		DBUtil.close(con, pstmt);
+		
+		System.out.println("attachment삭제성공");
+		
+		return result;
+	}//end of delete
+	
+	public int categoryDelete(int no)throws Exception{
+		
+		System.out.println("sellDAO.categorydelete no:"+no);
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " delete from category where sell_no=? ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		//attachment data delete
+		
+		pstmt.setInt(1, no);	
+		
+		int result = pstmt.executeUpdate();
+		
+		DBUtil.close(con, pstmt);
+		
+		System.out.println("category 삭제성공");
+		
+		return result;
+	}//end of delete
+	
+	public int caroptionDelete(int no)throws Exception{
+		
+		System.out.println("sellDAO.caroptiondelete no:"+no);
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " delete from caroption where sell_no=? ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		//attachment data delete
+		
+		pstmt.setInt(1, no);	
+		
+		int result = pstmt.executeUpdate();
+		
+		DBUtil.close(con, pstmt);
+		
+		System.out.println("category 삭제성공");
+		
+		return result;
+	}//end of delete
+	
+	public List<Object> brandSearchList(String brand) throws SQLException{
+		
+		List<Object> lsit = null;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select s.no, a.file1, s.condition, c.spec, c.distance, c.grade, c.year, c.location, c.price "
+				+ " from sell s, attachment a, category c "
+				+ " where (s.no = a.sell_no) and (c.sell_no = s.no) and (c.brand = ?) " 
+				+ " order by s.no desc, s.condition desc ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		pstmt.setString(1, brand);
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null) {
+			while(rs.next()) {
+				if(lsit == null) lsit = new ArrayList<Object>();
+				
+				SellListDTO dto = new SellListDTO();
+//				AttachmentDTO adto = new AttachmentDTO();
+//				CategoryDTO cdto = new CategoryDTO();
+				dto.setNo(rs.getInt("no"));
+				dto.setFile1(rs.getString("file1"));
+				dto.setCondition(rs.getInt("condition"));
+				dto.setSpec(rs.getString("spec"));
+				dto.setDistance(rs.getInt("distance"));
+				dto.setGrade(rs.getString("grade"));
+				dto.setYear(rs.getString("year"));
+				dto.setLocation(rs.getString("location"));
+				dto.setPrice(rs.getInt("price"));
+				lsit.add(dto);
+			}
+			
+		}
+		
+		DBUtil.close(con, pstmt, rs);
+		
+		System.out.println("SellDAO.brandSearchList() list:" + lsit);
+		
+		return lsit;
+		
+	}
+}// end of sell

@@ -1,0 +1,46 @@
+package com.undercar.member.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import com.undercar.member.dto.LoginDTO;
+import com.undercar.util.db.DBUtil;
+
+public class MemberDAO {
+
+	public LoginDTO login(LoginDTO dto) throws Exception{
+		System.out.println("MemberDAO.login().dto" + dto);
+		
+		LoginDTO outDTO = null;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select m.id, m.name, m.grade, g.gradeName from member m, grade g "
+				+ " where (m.id = ? and m.pw = ?) "
+				+ " and (m.grade = g.grade) ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, dto.getId());
+		pstmt.setString(2, dto.getPw());
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null && rs.next()) {
+			outDTO = new LoginDTO();
+			outDTO.setId(rs.getString("id"));
+			outDTO.setName(rs.getString("name"));
+			outDTO.setGrade(rs.getInt("grade"));
+			outDTO.setGradeName("gradeName");
+		}
+		
+		DBUtil.close(con, pstmt, rs);
+		
+		System.out.println("MemberDAO.login() " + outDTO);
+		
+		return outDTO;
+		
+	}// end of login()
+
+	public Integer join()
+}

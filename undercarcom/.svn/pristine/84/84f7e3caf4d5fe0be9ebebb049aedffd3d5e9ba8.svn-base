@@ -1,0 +1,51 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>내 정보보기</title>
+</head>
+<body>
+<div class="container">
+		<h2>내 정보보기</h2>
+		<table class="table">
+			<tr>
+				<th>아이디</th>
+				<td>${dto.id}</td>
+			</tr>
+			<tr>
+				<th>이름</th>
+				<td>${dto.name}</td>
+			</tr>
+			<tr>
+				<th>생년월일</th>
+				<td>${dto.birth}</td>
+			</tr>
+			<tr>
+				<th>성별</th>
+				<td>${dto.gender}</td>
+			</tr>
+			<tr>
+				<th>연락처</th>
+				<td>${dto.tel}</td>
+			</tr>
+			<tr>
+				<th>이메일</th>
+				<td>${dto.email}</td>
+			</tr>
+			<tr>
+				<th>등급명</th>
+				<td>${login.gradeName}</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+				<a href="updateForm.do"><button class="btn btn-default">수정</button></a>
+					<a href="delete.do?"><button id="deleteBtn" class="btn btn-default">회원탈퇴</button></a>
+					<button type="button" onclick="history.back();"class="btn btn-default">이전화면으로</button>
+				</td>
+			</tr>
+			</table>
+			</div>
+</body>
+</html>

@@ -1,0 +1,164 @@
+package com.undercar.bean;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+
+import com.undercar.faq.service.FaqDeleteService;
+import com.undercar.faq.service.FaqListService;
+import com.undercar.faq.service.FaqUpdateService;
+import com.undercar.faq.service.FaqViewService;
+import com.undercar.faq.service.FaqWriteService;
+import com.undercar.main.Controller;
+import com.undercar.main.Service;
+import com.undercar.notice.controller.NoticeController;
+import com.undercar.notice.dao.NoticeDAO;
+import com.undercar.notice.service.NoticeDeleteService;
+import com.undercar.notice.service.NoticeListService;
+import com.undercar.notice.service.NoticeUpdateService;
+import com.undercar.notice.service.NoticeViewService;
+import com.undercar.notice.service.NoticeWriteService;
+import com.undercar.qna.dao.QnaDAO;
+import com.undercar.qna.service.QnaDeleteService;
+import com.undercar.qna.service.QnaListService;
+import com.undercar.qna.service.QnaUpdateService;
+import com.undercar.qna.service.QnaViewService;
+import com.undercar.qna.service.QnaWriteService;
+import com.undercar.sell.controller.SellController;
+import com.undercar.sell.dao.SellDAO;
+import com.undercar.sell.service.SellListService;
+import com.undercar.member.controller.MemberController;
+import com.undercar.member.dao.MemberDAO;
+import com.undercar.member.service.MemberLoginService;
+import com.undercar.message.controller.MessageController;
+import com.undercar.message.dao.MessageDAO;
+import com.undercar.message.service.MessageDeleteService;
+import com.undercar.message.service.MessageListService;
+import com.undercar.message.service.MessageViewService;
+import com.undercar.message.service.MessageWriteService;
+
+/**
+ * Servlet implementation class Beans
+ */
+@WebServlet(urlPatterns = "/init", loadOnStartup = 1)
+public class Beans extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	
+	private static Map<String, Controller> controllers = new HashMap<>();
+	private static Map<String, Service> services  = new HashMap<>();
+	private static Map<String, Object> daos = new HashMap<>();
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public Beans() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+	/**
+	 * @see Servlet#init(ServletConfig)
+	 */
+	public void init(ServletConfig config) throws ServletException {
+		// TODO Auto-generated method stub
+
+		System.out.println("Beans.init() -- {}");
+		System.out.println("객체 초기화 중--------------------");
+		
+		//--------------member----------------
+		daos.put("memberDAO", new MemberDAO());
+		services.put("memberLoginService", new MemberLoginService((MemberDAO) daos.get("memberDAO")));
+		controllers.put("memberController", new MemberController(services.get("memberLoginService")));
+
+		//--------------message----------------
+		//*************dao********************
+		daos.put("messageDAO", new MessageDAO());
+		//*************servie********************
+		services.put("messageListService", new MessageListService((MessageDAO) daos.get("messageDAO")));
+		services.put("messageViewService", new MessageViewService((MessageDAO) daos.get("messageDAO")));
+		services.put("messageWriteService", new MessageWriteService((MessageDAO) daos.get("messageDAO")));
+		services.put("messageDeleteService", new MessageDeleteService((MessageDAO) daos.get("messageDAO")));
+		//*************controller********************
+		controllers.put("messageController", 
+				new MessageController(services.get("messageListService"),
+						services.get("messageViewService"),
+						services.get("messageWriteService"),
+						services.get("messageDeleteService")));
+		
+		// *** 공지시항 ***
+		daos.put("noticeDAO", new NoticeDAO());
+				
+		services.put("noticeListService", new NoticeListService((NoticeDAO) daos.get("noticeDAO")));
+		services.put("noticeViewService", new NoticeViewService((NoticeDAO) daos.get("noticeDAO")));
+		services.put("noticeWriteService", new NoticeWriteService((NoticeDAO) daos.get("noticeDAO")));
+		services.put("noticeUpdateService", new NoticeUpdateService((NoticeDAO) daos.get("noticeDAO")));
+		services.put("noticeDeleteService", new NoticeDeleteService((NoticeDAO) daos.get("noticeDAO")));
+				
+		controllers.put("noticeController",
+				new NoticeController(
+						services.get("noticeListService"),
+						services.get("noticeViewService"),
+						services.get("noticeWriteService"),
+						services.get("noticeUpdateService"),
+						services.get("noticeDeleteService")));
+		
+		
+		//---------------------------------------------------------------------------------------------------
+		// *** qna ***
+		daos.put("qnaDAO", new QnaDAO());
+		
+		services.put("qnaListService", new QnaListService((QnaDAO) daos.get("QnaDAO")));
+		services.put("qnaViewService", new QnaViewService((QnaDAO) daos.get("QnaDAO")));
+		services.put("qnaWriteService", new QnaWriteService((QnaDAO) daos.get("QnaDAO")));
+		services.put("qnaUpdateService", new QnaUpdateService((QnaDAO) daos.get("QnaDAO")));
+		services.put("qnaDeleteService", new QnaDeleteService((QnaDAO) daos.get("QnaDAO")));
+		
+		controllers.put("QnaController",
+				new NoticeController(
+						services.get("QnaListService"),
+						services.get("QnaViewService"),
+						services.get("QnaWriteService"),
+						services.get("QnaUpdateService"),
+						services.get("QnaDeleteService")));
+		//---------------------------------------------------------------------------------------------------
+		// *** faq ***
+		daos.put("faqDAO", new QnaDAO());
+		
+		services.put("faqListService", new FaqListService((QnaDAO) daos.get("faqDAO")));
+		services.put("faqViewService", new FaqViewService((QnaDAO) daos.get("faqDAO")));
+		services.put("faqWriteService", new FaqWriteService((QnaDAO) daos.get("faqDAO")));
+		services.put("faqUpdateService", new FaqUpdateService((QnaDAO) daos.get("faqDAO")));
+		services.put("faqDeleteService", new FaqDeleteService((QnaDAO) daos.get("faqDAO")));
+		
+		controllers.put("QnaController",
+				new NoticeController(
+						services.get("faqListService"),
+						services.get("faqViewService"),
+						services.get("faqWriteService"),
+						services.get("faqUpdateService"),
+						services.get("faqDeleteService")));
+		
+		//----------------------------------------------------------------------------------------------------------------
+		// *** Sell ***
+		
+		daos.put("sellDAO", new SellDAO());
+		
+		services.put("sellListService", new SellListService((SellDAO) daos.get("sellDAO")));
+		
+		controllers.put("SellListService", 
+				new SellController(
+						services.get("sellListService")));
+		
+		
+		
+		System.out.println("객체 초기화 완료-------------------");
+	}// end of init()
+	
+	public static Controller getController(String name) {
+		return controllers.get(name);
+	}
+}

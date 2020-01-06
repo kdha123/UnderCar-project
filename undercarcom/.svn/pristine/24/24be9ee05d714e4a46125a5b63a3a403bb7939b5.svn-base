@@ -1,0 +1,25 @@
+package com.undercar.carclass.dto;
+
+public class CarClassDTO {
+
+	int no;
+	String carclass;
+	
+	public int getNo() {
+		return no;
+	}
+	public void setNo(int no) {
+		this.no = no;
+	}
+	public String getCarclass() {
+		return carclass;
+	}
+	public void setCarclass(String carclass) {
+		this.carclass = carclass;
+	}
+	@Override
+	public String toString() {
+		return "CarClass [no=" + no + ", carclass=" + carclass + "]";
+	}
+	
+}

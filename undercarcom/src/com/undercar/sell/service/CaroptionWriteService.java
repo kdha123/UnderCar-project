@@ -1,0 +1,26 @@
+package com.undercar.sell.service;
+
+import com.undercar.caroption.dto.CarOptionDTO;
+import com.undercar.main.Service;
+import com.undercar.sell.dao.SellDAO;
+import com.undercar.sell.dto.SellDTO;
+
+public class CaroptionWriteService implements Service{
+
+	private SellDAO dao;
+	
+	public CaroptionWriteService(SellDAO dao) {
+		this.dao = dao;
+	}
+
+	@Override
+	public Object service(Object[] objs) throws Exception {
+		// TODO Auto-generated method stub
+		System.out.println("CaroptionWriteService.service()");
+		
+		CarOptionDTO codto = (CarOptionDTO) objs[0];
+		
+		
+		return dao.caroptionWrite(codto);
+	}
+}

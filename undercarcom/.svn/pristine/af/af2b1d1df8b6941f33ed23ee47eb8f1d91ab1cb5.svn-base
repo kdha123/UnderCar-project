@@ -1,0 +1,105 @@
+package com.undercar.sell.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.undercar.attachment.dto.AttachmentDTO;
+import com.undercar.sell.dto.SellDTO;
+import com.undercar.util.db.DBUtil;
+import com.undercar.util.page.PageObject;
+
+public class SellDAO {
+
+	public List<Object> list(PageObject pageObject)throws Exception{
+		
+		System.out.println("SellDAO.list()");
+		
+		List<Object> list = null;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select s.no, s.title, s.condition, s.hit, a.file1 from sell s, attachment a "
+				+ " where s.no = a.sell_no ";
+		
+		// 검색 sql 부분
+//		sql +="";
+		
+		sql += " order by s.no desc, s.condition desc ";
+		
+		sql += " select rownum rnum, no, title, condition, hit, file1 "
+				+ " from (" + sql + ") ";
+		
+		sql += " select * from (" + sql + ") "
+				+ " where rnum between ? and ? ";
+		System.out.println("SellDAO.list().sql:" + sql);
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		int idx = 1;
+		// 검색
+//		idx = SerchCondition.setPreparedStatement(pstmt, pageObject, idx);
+		
+		pstmt.setInt(idx++, pageObject.getStartRow());
+		pstmt.setInt(idx++, pageObject.getEndRow());
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null) {
+			while(rs.next()) {
+				if(list == null) list = new ArrayList<Object>();
+				
+				SellDTO dto = new SellDTO();
+				AttachmentDTO adto = new AttachmentDTO();
+				dto.setNo(rs.getInt("no"));
+				dto.setTitle(rs.getString("title"));
+				dto.setCondition(rs.getInt("condition"));
+				dto.setHit(rs.getInt("hit"));
+				adto.setFile1(rs.getString("file1"));
+				list.add(dto);
+				list.add(adto);
+				
+			}// end of while
+		}// end of if
+		DBUtil.close(con, pstmt, rs);
+		
+		System.out.println("SellDAO.list().list:" + list);
+		
+		return list;
+		
+	}// end of list
+	
+	public int getTotalRow(PageObject pageObject)throws Exception{
+		
+		System.out.println("SellDAO.getTotal?Row()");
+		
+		int totalRow = 0;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select count (*) cnt from sell ";
+	
+		// 검색
+//		sql += SearchCondition.getSearchSQLWithWhere(pageObject);
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		
+		int idx = 1 ;
+		
+		// 검색
+//		idx = SearchCondition.getPreparedStatement(pstmt, pageObject, idx);
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if(rs != null && rs.next()) {
+			
+			totalRow = rs.getInt("cnt");
+		}// end of if
+		
+		return totalRow;
+	}// end of getTotalRow
+	
+	
+}// end of sell

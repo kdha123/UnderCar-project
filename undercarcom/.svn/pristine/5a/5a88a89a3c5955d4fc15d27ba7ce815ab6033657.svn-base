@@ -1,0 +1,25 @@
+package com.undercar.faq.service;
+
+import com.undercar.main.Service;
+import com.undercar.qna.dao.QnaDAO;
+import com.undercar.qna.dto.QnaDTO;
+
+public class FaqWriteService implements Service {
+  private QnaDAO dao;
+
+  public FaqWriteService(QnaDAO dao) {
+	this.dao=dao;
+	// TODO Auto-generated constructor stub
+}
+	@Override
+	public Object service(Object[] objs) throws Exception {
+		// TODO Auto-generated method stub
+		QnaDTO dto = (QnaDTO) objs[0];
+		System.out.println("Faq라이트 서비스");
+		
+
+	  dao.write(dto);
+	  return null;
+	}
+
+}

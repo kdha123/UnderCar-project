@@ -1,0 +1,290 @@
+package com.undercar.member.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.undercar.member.dto.LoginDTO;
+import com.undercar.member.dto.MemberDTO;
+import com.undercar.util.db.DBUtil;
+import com.undercar.util.page.PageObject;
+
+public class MemberDAO {
+
+	public LoginDTO login(LoginDTO dto) throws Exception {
+		System.out.println("MemberDAO.login().dto" + dto);
+
+		LoginDTO outDTO = null;
+
+		Connection con = DBUtil.getConnection();
+
+		String sql = " select m.id, m.name, m.grade, g.gradeName from member m, grade g "
+				+ " where (m.id = ? and m.pw = ?) " + " and (m.grade = g.grade) ";
+
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, dto.getId());
+		pstmt.setString(2, dto.getPw());
+
+		ResultSet rs = pstmt.executeQuery();
+
+		if (rs != null && rs.next()) {
+			outDTO = new LoginDTO();
+			outDTO.setId(rs.getString("id"));
+			outDTO.setName(rs.getString("name"));
+			outDTO.setGrade(rs.getInt("grade"));
+			outDTO.setGradeName(rs.getString("gradeName"));
+		}
+
+		DBUtil.close(con, pstmt, rs);
+
+		System.out.println("MemberDAO.login() " + outDTO);
+
+		return outDTO;
+
+	}// end of login()
+
+	public Integer join(MemberDTO dto) throws Exception {
+		System.out.println("MemberDAO.join() " + dto);
+
+		Connection con = DBUtil.getConnection();
+		String sql = " insert into member(id,pw, name, birth, gender, tel, email, grade, bno, baddr, bname, "
+				+ " btel, content) values(?,?,?,?,?,?,?,?,?,?,?,?,?)";
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, dto.getId());
+		pstmt.setString(2, dto.getPw());
+		pstmt.setString(3, dto.getName());
+		pstmt.setString(4, dto.getBirth());
+		pstmt.setString(5, dto.getGender());
+		pstmt.setString(6, dto.getTel());
+		pstmt.setString(7, dto.getEmail());
+		pstmt.setInt(8, dto.getGrade());
+		pstmt.setInt(9, dto.getBno());
+		pstmt.setString(10, dto.getBaddr());
+		pstmt.setString(11, dto.getBname());
+		pstmt.setInt(12, dto.getBtel());
+		pstmt.setString(13, dto.getContent());
+
+		int result = pstmt.executeUpdate();
+
+		System.out.println("회원가입 성공" + dto);
+
+		DBUtil.close(con, pstmt);
+
+		return result;
+
+	}// end of join()
+
+	public String idCheck(String id) throws Exception {
+		System.out.println("MemberDAO.id " + id);
+		String checkId = null;
+
+		Connection con = DBUtil.getConnection();
+		String sql = " select id from member where id = ? ";
+
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, id);
+		ResultSet rs = pstmt.executeQuery();
+
+		if (rs != null && rs.next()) {
+			checkId = rs.getString("id");
+		}
+
+		DBUtil.close(con, pstmt, rs);
+		return checkId;
+	} // end od idCheck()
+
+	// 로그인한 아이디를 가지고 내정보보기를 할때
+	public MemberDTO view(String id) throws Exception {
+		System.out.println("MemberDAO.view() " + id);
+		MemberDTO dto = null;
+		Connection con = DBUtil.getConnection();
+
+		String sql = " select id, pw, name,to_char(birth,'yyyy-mm-dd') birth, gender, tel, email, grade, bno, bname, baddr, btel, content from member where id = ? ";
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, id);
+
+		ResultSet rs = pstmt.executeQuery();
+
+		if (rs != null && rs.next()) {
+			dto = new MemberDTO();
+			dto.setId(rs.getString("id"));
+			dto.setPw(rs.getString("pw"));
+			dto.setName(rs.getString("name"));
+			dto.setBirth(rs.getString("birth"));
+			dto.setGender(rs.getString("gender"));
+			dto.setTel(rs.getString("tel"));
+			dto.setEmail(rs.getString("email"));
+			dto.setGrade(rs.getInt("grade"));
+			dto.setBno(rs.getInt("bno"));
+			dto.setBname(rs.getString("bname"));
+			dto.setBaddr(rs.getString("baddr"));
+			dto.setBtel(rs.getInt("btel"));
+			dto.setContent(rs.getString("content"));
+
+		}
+		DBUtil.close(con, pstmt, rs);
+		System.out.println("MemberDAO.view().dto " + dto);
+		return dto;
+
+	}// end of view()
+
+	public List<MemberDTO> list(PageObject pageObject) throws Exception {
+
+		System.out.println("MemberDAO.list()");
+
+		List<MemberDTO> list = null;
+
+		Connection con = DBUtil.getConnection();
+
+		String sql = " select id, name, " + " to_char(birth, 'yyyy-mm-dd') birth, gender, " + " tel, grade "
+				+ " from member ";
+		sql = " select rownum rnum, id, name, birth, gender, tel, grade from " + " ( " + sql + " ) ";
+		sql = " select * from (" + sql + ") where rnum between ? and ? ";
+		System.out.println("MemberDAO.list().sql : " + sql);
+
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setInt(1, pageObject.getStartRow());
+		pstmt.setInt(2, pageObject.getEndRow());
+
+		ResultSet rs = pstmt.executeQuery();
+
+		if (rs != null) {
+
+			while (rs.next()) {
+				if (list == null)
+					list = new ArrayList<MemberDTO>();
+
+				MemberDTO dto = new MemberDTO();
+
+				dto.setId(rs.getString("id"));
+				dto.setName(rs.getString("name"));
+				dto.setBirth(rs.getString("birth"));
+				dto.setGender(rs.getString("gender"));
+				dto.setTel(rs.getString("tel"));
+				dto.setGrade(rs.getInt("grade"));
+				list.add(dto);
+			}
+
+		}
+
+		DBUtil.close(con, pstmt, rs);
+
+		System.out.println("MemberDAO.list().list : " + list);
+
+		return list;
+	}
+
+	public int getTotalRow(PageObject pageObject) throws Exception {
+		// TODO Auto-generated method stub
+		System.out.println("MemberDAO.getTotalRow()");
+
+		int totalRow = 0;
+		Connection con = DBUtil.getConnection();
+		String sql = " select count(*) cnt from member ";
+		PreparedStatement pstmt = con.prepareStatement(sql);
+
+		ResultSet rs = pstmt.executeQuery();
+
+		if (rs != null && rs.next()) {
+			totalRow = rs.getInt("cnt");
+		}
+
+		DBUtil.close(con, pstmt, rs);
+
+		return totalRow;
+	}// end of getTotalRow()
+
+	public int update(MemberDTO dto) throws Exception {
+		System.out.println("MemberDAO.update().dto " + dto);
+
+		Connection con = DBUtil.getConnection();
+
+		String sql = " update member set pw = ?, tel = ?, email = ?, bno = ?, "
+				+ " bname = ?, btel = ?, baddr = ?, content = ? where id = ? ";
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, dto.getPw());
+		pstmt.setString(2, dto.getTel());
+		pstmt.setString(3, dto.getEmail());
+		pstmt.setInt(4, dto.getBno());
+		pstmt.setString(5, dto.getBname());
+		pstmt.setInt(6, dto.getBtel());
+		pstmt.setString(7, dto.getBaddr());
+		pstmt.setString(8, dto.getContent());
+		pstmt.setString(9, dto.getId());
+
+		int result = pstmt.executeUpdate();
+		System.out.println("글수정 성공 : " + dto);
+		DBUtil.close(con, pstmt);
+
+		return result;
+	}// end of update()
+
+	public Object pwUpdate(String id, String pw, String pwd) throws Exception {
+		System.out.println("MemberDAO.pwUpdate() " + pw + ", " + pwd+id);
+
+		Connection con = DBUtil.getConnection();
+		
+			
+		String sql = " update member set pw = ? where id = ? ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, pwd);
+		pstmt.setString(2, id);
+		
+		int result = pstmt.executeUpdate();
+		
+		DBUtil.close(con, pstmt);
+		System.out.println("비밀번호 변경 성공");
+		return result;
+		
+		
+	}// end of pwUpdate()
+
+	public Object delete(String id,String pw) throws Exception {
+		System.out.println("MemberDAO.pwDelete() " + id);
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " delete from member where id = ? ";
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, id);
+		
+		int result = pstmt.executeUpdate();
+		
+		System.out.println("멤버 삭제 성공");
+		DBUtil.close(con, pstmt);
+		return result;
+	}// end of delete()
+	
+	//비밀번호 확인
+	public String pwCheck(String id) throws Exception {
+		System.out.println("MemberDAO.id " + id);
+		String checkPw = null;
+		
+		Connection con = DBUtil.getConnection();
+		String sql = " select pw from member where id = ? ";
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, id);
+		ResultSet rs = pstmt.executeQuery();
+		
+		if (rs != null && rs.next()) {
+			checkPw = rs.getString("pw");
+		}
+		
+		DBUtil.close(con, pstmt, rs);
+		return checkPw;
+	} // end of PwCheck()
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+}

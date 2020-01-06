@@ -1,0 +1,621 @@
+package com.undercar.message.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.undercar.member.dto.LoginDTO;
+import com.undercar.message.dto.MessageDTO;
+import com.undercar.util.db.DBUtil;
+import com.undercar.util.page.PageObject;
+import com.undercar.util.page.SearchCondition;
+
+public class MessageDAO {
+	
+	// 1. list()
+	public List<MessageDTO> list(LoginDTO loginDTO, PageObject pageObject) throws Exception {
+		System.out.println("MessageDAO.list().loginDTO : "+loginDTO);
+		System.out.println("MessageDAO.list().loginDTO.getId() : "+loginDTO.getId());
+
+		List<MessageDTO> list = null;
+
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " select no, title, sender, accepter, to_char(sendDate, 'yyyy-mm-dd') sendDate from message ";
+		sql += SearchCondition.getMessageSearchSQLWithWhere(pageObject);
+		if(SearchCondition.getMessageSearchSQLWithWhere(pageObject).equals("")) {
+			sql	+= " where (accepter = ? and accdel = 0) ";
+		} else 
+			sql	+= " and (accepter = ? and accdel = 0) ";
+		sql += " order by no desc ";		
+		sql = " select rownum rnum,  no, title, sender, accepter, sendDate " + " from( " + sql + " ) ";
+		sql = " select * " + " from( " + sql + " ) " + " where rnum between ? and ? ";
+		System.out.println("MessageDAO.list().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		int idx = 1;
+		idx = SearchCondition.setMessagePreparedStatement(pstmt, pageObject, idx);
+		pstmt.setString(idx++, loginDTO.getId());
+		pstmt.setInt(idx++, pageObject.getStartRow());
+		pstmt.setInt(idx++, pageObject.getEndRow());
+		// 5. 실행
+		ResultSet rs = pstmt.executeQuery();
+		// 6. 데이터 표시 / 저장
+		if (rs != null) {
+			while (rs.next()) {
+				if (list == null)
+					list = new ArrayList<MessageDTO>();
+				MessageDTO dto = new MessageDTO();
+				dto.setNo(rs.getInt("no"));
+				dto.setTitle(rs.getString("title"));
+				dto.setSender(rs.getString("sender"));
+				dto.setAccepter(rs.getString("accepter"));
+				dto.setSendDate(rs.getString("sendDate"));
+				list.add(dto);
+			} // end of while(rs.next())
+		} // end of if(rs != null)
+		System.out.println("MessageDAO.list().list : " + list);
+
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt, rs);
+
+		return list;
+	}// end of list()
+	
+	// 1-1. sendList()
+	public List<MessageDTO> sendList(LoginDTO loginDTO, PageObject pageObject) throws Exception {
+		System.out.println("MessageDAO.sendList().loginDTO : "+loginDTO);
+		
+		List<MessageDTO> list = null;
+		
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " select no, title, sender, accepter, to_char(sendDate, 'yyyy-mm-dd') sendDate from message ";
+		sql += SearchCondition.getMessageSearchSQLWithWhere(pageObject);
+		if(SearchCondition.getMessageSearchSQLWithWhere(pageObject).equals("")) {
+			if(loginDTO.getId().equals("admin")) {
+				sql += " where (sender = ? and sendel = 0 and allCheck = 0) ";
+			} else {
+				sql += " where (sender = ? and sendel = 0) ";
+			}
+		} else {
+			if(loginDTO.getId().equals("admin")) {
+				sql += " and (sender = ? and sendel = 0 and allCheck = 0) ";
+			} else {
+				sql += " and (sender = ? and sendel = 0) ";
+			}
+		}
+		sql += " order by no desc ";
+		sql = " select rownum rnum,  no, title, sender, accepter, sendDate " + " from( " + sql + " ) ";
+		sql = " select * " + " from( " + sql + " ) " + " where rnum between ? and ? ";
+		System.out.println("MessageDAO.sendList().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		int idx = 1;
+		idx = SearchCondition.setMessagePreparedStatement(pstmt, pageObject, idx);
+		pstmt.setString(idx++, loginDTO.getId());
+		pstmt.setInt(idx++, pageObject.getStartRow());
+		pstmt.setInt(idx++, pageObject.getEndRow());
+		// 5. 실행
+		ResultSet rs = pstmt.executeQuery();
+		// 6. 데이터 표시 / 저장
+		if (rs != null) {
+			while (rs.next()) {
+				if (list == null)
+					list = new ArrayList<MessageDTO>();
+				MessageDTO dto = new MessageDTO();
+				dto.setNo(rs.getInt("no"));
+				dto.setTitle(rs.getString("title"));
+				dto.setSender(rs.getString("sender"));
+				dto.setAccepter(rs.getString("accepter"));
+				dto.setSendDate(rs.getString("sendDate"));
+				list.add(dto);
+			} // end of while(rs.next())
+		} // end of if(rs != null)
+		System.out.println("MessageDAO.sendList().list : " + list);
+		
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt, rs);
+		
+		return list;
+	}// end of sendList()
+	
+	// 1-2. noAccList()
+	public List<MessageDTO> noAccList(LoginDTO loginDTO, PageObject pageObject) throws Exception {
+		System.out.println("MessageDAO.noAccList().loginDTO : "+loginDTO);
+		
+		List<MessageDTO> list = null;
+		
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " select no, title, sender, accepter, to_char(sendDate, 'yyyy-mm-dd') sendDate "
+				+ " from message ";
+		sql += SearchCondition.getMessageSearchSQLWithWhere(pageObject);
+		if(SearchCondition.getMessageSearchSQLWithWhere(pageObject).equals(""))
+			sql += " where (accepter = ? and acceptDate is null and accdel = 0) ";
+		else	
+			sql += " and (accepter = ? and acceptDate is null and accdel = 0) ";
+		sql += " order by no desc ";
+		sql = " select rownum rnum,  no, title, sender, accepter, sendDate " + " from( " + sql + " ) ";
+		sql = " select * " + " from( " + sql + " ) " + " where rnum between ? and ? ";
+		System.out.println("MessageDAO.noAccList().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, loginDTO.getId());
+		int idx = 1;
+		idx = SearchCondition.setMessagePreparedStatement(pstmt, pageObject, idx);
+		pstmt.setString(idx++, loginDTO.getId());
+		pstmt.setInt(idx++, pageObject.getStartRow());
+		pstmt.setInt(idx++, pageObject.getEndRow());
+		// 5. 실행
+		ResultSet rs = pstmt.executeQuery();
+		// 6. 데이터 표시 / 저장
+		if (rs != null) {
+			while (rs.next()) {
+				if (list == null)
+					list = new ArrayList<MessageDTO>();
+				MessageDTO dto = new MessageDTO();
+				dto.setNo(rs.getInt("no"));
+				dto.setTitle(rs.getString("title"));
+				dto.setSender(rs.getString("sender"));
+				dto.setAccepter(rs.getString("accepter"));
+				dto.setSendDate(rs.getString("sendDate"));
+				list.add(dto);
+			} // end of while(rs.next())
+		} // end of if(rs != null)
+		System.out.println("MessageDAO.noAccList().list : " + list);
+		
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt, rs);
+		
+		return list;
+	}// end of noAccList()
+	
+	// 1-3. allWriteList()
+	public List<MessageDTO> allWriteList(LoginDTO loginDTO, PageObject pageObject) throws Exception {
+		System.out.println("MessageDAO.allWriteList().loginDTO : "+loginDTO);
+		
+		List<MessageDTO> list = null;
+		
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " select no, title, to_char(sendDate, 'yyyy-mm-dd') sendDate "
+				+ " from message ";
+		sql += SearchCondition.getMessageSearchSQLWithWhere(pageObject);
+		if(SearchCondition.getMessageSearchSQLWithWhere(pageObject).equals(""))
+			sql += " where (allCheck > 0 and sendel = 0) and "
+					+ " ROWID IN (select max(ROWID) from message group by allCheck) ";
+		else
+			sql += " and (allCheck > 0 and sendel = 0) and "
+				+ " ROWID IN (select max(ROWID) from message group by allCheck) ";
+		sql += " order by no desc ";
+		sql = " select rownum rnum,  no, title, sendDate " + " from( " + sql + " ) ";
+		sql = " select * " + " from( " + sql + " ) " + " where rnum between ? and ? ";
+		System.out.println("MessageDAO.allWriteList().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		int idx = 1;
+		idx = SearchCondition.setMessagePreparedStatement(pstmt, pageObject, idx);
+		pstmt.setInt(idx++, pageObject.getStartRow());
+		pstmt.setInt(idx++, pageObject.getEndRow());
+		// 5. 실행
+		ResultSet rs = pstmt.executeQuery();
+		// 6. 데이터 표시 / 저장
+		if (rs != null) {
+			while (rs.next()) {
+				if (list == null)
+					list = new ArrayList<MessageDTO>();
+				MessageDTO dto = new MessageDTO();
+				dto.setNo(rs.getInt("no"));
+				dto.setTitle(rs.getString("title"));
+//				dto.setSender(rs.getString("sender"));
+//				dto.setAccepter(rs.getString("accepter"));
+				dto.setSendDate(rs.getString("sendDate"));
+				list.add(dto);
+			} // end of while(rs.next())
+		} // end of if(rs != null)
+		System.out.println("MessageDAO.allWriteList().list : " + list);
+		
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt, rs);
+		
+		return list;
+	}// end of allWriteList()
+	
+	//1-4 전체 페이지
+	public Integer getTotalRow(PageObject pageObject, LoginDTO loginDTO) throws Exception {
+
+		System.out.println("MessageDAO.getTotalRow() : ");
+
+		int totalRow = 0;
+
+		Connection con = DBUtil.getConnection();
+
+		String sql = " select count(*) cnt from message ";
+		sql += SearchCondition.getMessageSearchSQLWithWhere(pageObject);
+		if(SearchCondition.getMessageSearchSQLWithWhere(pageObject).equals(""))
+			sql += " where (accepter = ? and accdel = 0) ";
+		else sql += " and (accepter = ? and accdel = 0) ";
+		System.out.println("MessageDAO.getTotalRow().sql : " + sql);
+
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		int idx = 1;
+		idx = SearchCondition.setMessagePreparedStatement(pstmt, pageObject, idx);
+		pstmt.setString(idx++, loginDTO.getId());
+
+		ResultSet rs = pstmt.executeQuery();
+
+		if (rs != null && rs.next()) {
+			totalRow = rs.getInt("cnt");
+		}
+		
+		DBUtil.close(con, pstmt, rs);
+
+		System.out.println("MessageDAO.getTotalRow().totalRow : " + totalRow);
+
+		return totalRow;
+	}// end of getTotalRow()
+	
+	//1-5 전체 페이지 - 보낸 메세지
+	public Integer getTotalSendRow(PageObject pageObject, LoginDTO loginDTO) throws Exception {
+		
+		System.out.println("MessageDAO.getTotalSendRow() : ");
+		
+		int totalRow = 0;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select count(*) cnt from message ";
+		sql += SearchCondition.getMessageSearchSQLWithWhere(pageObject);
+		if(SearchCondition.getMessageSearchSQLWithWhere(pageObject).equals("")) {
+			if(loginDTO.getId().equals("admin")) {
+				sql += " where (sender = ? and sendel = 0 and allCheck = 0) ";
+			} else {
+				sql += " where (sender = ? and sendel = 0) ";
+			}
+		} else {
+			if(loginDTO.getId().equals("admin")) {
+				sql += " and (sender = ? and sendel = 0 and allCheck = 0) ";
+			} else {
+				sql += " and (sender = ? and sendel = 0) ";
+			}
+		}
+		System.out.println("MessageDAO.getTotalSendRow().sql : " + sql);
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		int idx = 1;
+		idx = SearchCondition.setMessagePreparedStatement(pstmt, pageObject, idx);
+		pstmt.setString(idx++, loginDTO.getId());
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if (rs != null && rs.next()) {
+			totalRow = rs.getInt("cnt");
+		}
+		
+		DBUtil.close(con, pstmt, rs);
+		
+		System.out.println("MessageDAO.getTotalSendRow().totalRow : " + totalRow);
+		
+		return totalRow;
+	}// end of getTotalSendRow()
+
+	//1-6 전체 페이지 - 전체 메세지
+	public Integer getTotalAllRow(PageObject pageObject, LoginDTO loginDTO) throws Exception {
+		
+		System.out.println("MessageDAO.getTotalAllRow() : ");
+		
+		int totalRow = 0;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select count(*) cnt from message ";
+		sql += SearchCondition.getMessageSearchSQLWithWhere(pageObject);
+		if(SearchCondition.getMessageSearchSQLWithWhere(pageObject).equals(""))
+			sql += " where (allCheck > 0 and sendel = 0) and "
+					+ " ROWID IN (select max(ROWID) from message group by allCheck) ";
+		else
+			sql += " and (allCheck > 0 and sendel = 0) and "
+				+ " ROWID IN (select max(ROWID) from message group by allCheck) ";
+		System.out.println("MessageDAO.getTotalAllRow().sql : " + sql);
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		int idx = 1;
+		idx = SearchCondition.setMessagePreparedStatement(pstmt, pageObject, idx);
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if (rs != null && rs.next()) {
+			totalRow = rs.getInt("cnt");
+		}
+		
+		DBUtil.close(con, pstmt, rs);
+		
+		System.out.println("MessageDAO.getTotalAllRow().totalRow : " + totalRow);
+		
+		return totalRow;
+	}// end of getTotalAllRow()
+	
+	//1-7 전체 페이지 - 안읽은 메세지
+	public Integer getTotalNoRow(PageObject pageObject, LoginDTO loginDTO) throws Exception {
+		
+		System.out.println("MessageDAO.getTotalNoRow() : ");
+		
+		int totalRow = 0;
+		
+		Connection con = DBUtil.getConnection();
+		
+		String sql = " select count(*) cnt from message ";
+		sql += SearchCondition.getMessageSearchSQLWithWhere(pageObject);
+		if(SearchCondition.getMessageSearchSQLWithWhere(pageObject).equals(""))
+			sql += " where (accepter = ? and acceptDate is null and accdel = 0) ";
+		else	
+			sql += " and (accepter = ? and acceptDate is null and accdel = 0) ";
+		System.out.println("MessageDAO.getTotalNoRow().sql : " + sql);
+		
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		int idx = 1;
+		idx = SearchCondition.setMessagePreparedStatement(pstmt, pageObject, idx);
+		pstmt.setString(idx++, loginDTO.getId());
+		
+		ResultSet rs = pstmt.executeQuery();
+		
+		if (rs != null && rs.next()) {
+			totalRow = rs.getInt("cnt");
+		}
+		
+		DBUtil.close(con, pstmt, rs);
+		
+		System.out.println("MessageDAO.getTotalNoRow().totalRow : " + totalRow);
+		
+		return totalRow;
+	}// end of getTotalNoRow()
+	
+	// 2. view()
+	public MessageDTO view(int no) throws Exception {
+		System.out.println("MessageDAO.view().no : " + no);
+
+		MessageDTO dto = null;
+
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " select no, title, content, sender, accepter, sendDate, acceptDate, sendel, accdel, acceptDate, allCheck "
+				+ " from message where no = ? ";
+		System.out.println("MessageDAO.view().sql : " + sql);
+		// 4. 실행 객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setInt(1, no);
+		// 5. 실행
+		ResultSet rs = pstmt.executeQuery();
+		// 6. 데이터 표시 / 저장
+		if (rs != null && rs.next()) {
+			dto = new MessageDTO();
+			dto.setNo(rs.getInt("no"));
+			dto.setTitle(rs.getString("title"));
+			dto.setContent(rs.getString("content"));
+			dto.setSender(rs.getString("sender"));
+			dto.setAccepter(rs.getString("accepter"));
+			dto.setSendDate(rs.getString("sendDate"));
+			dto.setAcceptDate(rs.getString("acceptDate"));
+			dto.setSendel(rs.getInt("sendel"));
+			dto.setAccdel(rs.getInt("accdel"));
+			dto.setAllCheck(rs.getInt("allCheck"));
+		} // end of if
+		System.out.println("MessageDAO.view().dto : " + dto);
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt, rs);
+
+		return dto;
+	}// end of view()
+	
+	// 2-1 acceptDate Update method
+	public void accDateUpate(int no) throws Exception {
+		System.out.println("MessageDAO.accDateUpate().no: " + no);
+		
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " update message set acceptDate = sysdate where no = ? ";
+		System.out.println("MessageDAO.accDateUpate().sql: " + sql);
+		// 4. 실행 객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setInt(1, no);
+		// 5. 실행
+		int result = pstmt.executeUpdate();
+		// 6. 데이터 표시 / 저장
+		if(result == 1)
+			System.out.println("읽은 날짜 update 성공");
+		else System.out.println("읽은 날짜 update 실패");
+		
+	}// end of accDateUpate()
+
+	// 3. write
+	public int write(MessageDTO dto) throws Exception {
+		System.out.println("MessageDAO.write().dto : " + dto);
+
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " insert into message(no, title, content, sender, accepter)"
+				+ " values(message_seq.nextval, ?, ?, ?, ?) ";
+		System.out.println("MessageDAO.write().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, dto.getTitle());
+		pstmt.setString(2, dto.getContent());
+		pstmt.setString(3, dto.getSender());
+		pstmt.setString(4, dto.getAccepter());
+		// 5. 실행
+		int result = pstmt.executeUpdate();
+		// 6. 데이터 표시 / 저장
+		if (result == 1)
+			System.out.println("메시지 보내기 성공");
+		else
+			System.out.println("메시지 보내기 실패");
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt);
+
+		return result;
+	}// end of write()
+	
+	// 3-1. 전체 회원에게 글쓰기 method
+	public int allWrite(MessageDTO dto) throws Exception {
+		System.out.println("MessageDAO.allWrite().dto : " + dto);
+		
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " insert into message(no, title, content, sender, accepter, allCheck)"
+				+ " values(message_seq.nextval, ?, ?, ?, ?, 1) ";
+		System.out.println("MessageDAO.allWrite().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, dto.getTitle());
+		pstmt.setString(2, dto.getContent());
+		pstmt.setString(3, dto.getSender());
+		pstmt.setString(4, dto.getAccepter());
+		// 5. 실행
+		int result = pstmt.executeUpdate();
+		// 6. 데이터 표시 / 저장
+		if (result == 1)
+			System.out.println("메시지 allWrite 성공");
+		else
+			System.out.println("메시지 allWrite 실패");
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt);
+		
+		return result;
+	}// end of updateAllCheck()
+	
+	// 3-1-1. 전체 회원에게 글쓰기 전에 allCheck 변수 +1
+	public int allCheckUpdate() throws Exception {
+		System.out.println("MessageDAO.allCheckUpdate()");
+		
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " update message set allcheck = allcheck + 1 where allCheck > 0 ";
+		System.out.println("MessageDAO.allCheckUpdate().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		// 5. 실행
+		int result = pstmt.executeUpdate();
+		// 6. 데이터 표시 / 저장
+		if (result == 1)
+			System.out.println("메시지 allCheckUpdate 성공");
+		else
+			System.out.println("메시지 allCheckUpdate 실패");
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt);
+		
+		return result;
+	}// end of allCheckUpdate()
+
+	// 4. accUpdate
+	public int accUpdate(int no) throws Exception {
+		System.out.println("MessageDAO.accUpdate().no : " + no);
+		
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " update message set accdel = 1 where no = ? ";
+		System.out.println("MessageDAO.accUpdate().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setInt(1, no);
+		// 5. 실행
+		int result = pstmt.executeUpdate();
+		// 6. 데이터 표시 / 저장
+		if (result == 1)
+			System.out.println("메시지 accUpdate 성공");
+		else
+			System.out.println("메시지 accUpdate 실패");
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt);
+		
+		return result;
+	}// end of accUpdate()
+	
+	// 5. senUpdate
+	public int senUpdate(int no) throws Exception {
+		System.out.println("MessageDAO.senUpdate().no : " + no);
+		
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " update message set sendel = 1 where no = ? ";
+		System.out.println("MessageDAO.senUpdate().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setInt(1, no);
+		// 5. 실행
+		int result = pstmt.executeUpdate();
+		// 6. 데이터 표시 / 저장
+		if (result == 1)
+			System.out.println("메시지 senUpdate 성공");
+		else
+			System.out.println("메시지 senUpdate 실패");
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt);
+		
+		return result;
+	}// end of senUpdate()
+	
+	// 6. allUpdate
+	public int allUpdate(String title) throws Exception {
+		System.out.println("MessageDAO.allUpdate().title : " + title);
+		
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " update message set sendel = 1 where title = ? ";
+		System.out.println("MessageDAO.allUpdate().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setString(1, title);
+		// 5. 실행
+		int result = pstmt.executeUpdate();
+		// 6. 데이터 표시 / 저장
+		if (result == 1)
+			System.out.println("메시지 allUpdate 성공");
+		else
+			System.out.println("메시지 allUpdate 실패");
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt);
+		
+		return result;
+	}// end of senUpdate()
+	
+	// 7. delete
+	public int delete(int no) throws Exception {
+		System.out.println("MessageDAO.delete().no : " + no);
+
+		// 1. 드라이버 확인, 2. 연결객체
+		Connection con = DBUtil.getConnection();
+		// 3. sql
+		String sql = " delete from message where no = ? ";
+		System.out.println("MessageDAO.delete().sql : " + sql);
+		// 4. 실행객체
+		PreparedStatement pstmt = con.prepareStatement(sql);
+		pstmt.setInt(1, no);
+		// 5. 실행
+		int result = pstmt.executeUpdate();
+		// 6. 데이터 표시 / 저장
+		if (result == 1)
+			System.out.println("메시지 삭제 성공");
+		else
+			System.out.println("메시지 삭제 실패");
+		// 7. 자원 닫기
+		DBUtil.close(con, pstmt);
+
+		return result;
+	}// end of delete()
+
+}// end of MessageDAO class

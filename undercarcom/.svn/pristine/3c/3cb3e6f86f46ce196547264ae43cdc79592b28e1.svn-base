@@ -1,0 +1,243 @@
+package com.undercar.message.controller;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.undercar.main.Controller;
+import com.undercar.main.Execute;
+import com.undercar.main.Service;
+import com.undercar.member.dto.LoginDTO;
+import com.undercar.member.dto.MemberDTO;
+import com.undercar.message.dto.MessageDTO;
+import com.undercar.util.page.PageObject;
+
+public class MessageController implements Controller {
+
+	private Service listService;
+	private Service viewService;
+	private Service writeService;
+	private Service updateStatusService;
+	private Service deleteService;
+	private Service memberListService;
+
+	public MessageController(Service listService, Service viewService, Service writeService,
+			Service updateStatusService, Service deleteService, Service memberListService) {
+		this.listService = listService;
+		this.viewService = viewService;
+		this.writeService = writeService;
+		this.updateStatusService = updateStatusService;
+		this.deleteService = deleteService;
+		this.memberListService = memberListService;
+	}
+
+	@Override
+	public String execute(HttpServletRequest request, HttpServletResponse response, String uri) throws Exception {
+		// TODO Auto-generated method stub
+		System.out.println("MessaegController.execute()");
+		// 공통 사용 변수 선언
+		String jsp = "";
+		int no = 0;
+		String pageType = "";
+		// 세션에서 id를 가져오기 위한 변수들
+		HttpSession session = request.getSession(true);
+		LoginDTO loginDto = (LoginDTO) session.getAttribute("login");
+		// 페이지 처리를 위한 변수
+		PageObject pageObject = PageObject.getInstance(request.getParameter("page"), request.getParameter("perPageNum"));
+
+		switch (uri) {
+		case "/message/list.do":
+			System.out.println("MessageController.execute().list 처리");
+			pageType = request.getParameter("pageType");
+			
+			if(pageType == null)
+				request.setAttribute("list", Execute.service(listService, loginDto, 0));
+			else if(pageType.equals("acc"))
+				request.setAttribute("list", Execute.service(listService, loginDto, 1));
+			else if(pageType.equals("sen"))
+				request.setAttribute("list", Execute.service(listService, loginDto, 2));
+			else if(pageType.equals("no"))
+				request.setAttribute("list", Execute.service(listService, loginDto, 3));
+			else if(pageType.equals("all"))
+				request.setAttribute("list", Execute.service(listService, loginDto, 4));
+
+			jsp = "message/list";
+
+			break;
+
+		case "/message/view.do":
+			System.out.println("MessageController.execute().view 처리");
+
+			no = Integer.parseInt(request.getParameter("no"));
+			request.setAttribute("dto", Execute.service(viewService, no, 1));
+
+			jsp = "message/view";
+
+			break;
+
+		case "/message/writeForm.do":
+			System.out.println("MessageController.execute().writeForm 처리");
+
+			jsp = "message/writeForm";
+
+			break;
+
+		case "/message/write.do":
+			System.out.println("MessageController.execute().write 처리");
+			// 전체 메시지인지 기본적인 메시지인지 확인하는 변수 받기
+			int check = Integer.parseInt(request.getParameter("accCheck"));
+			System.out.println("check : "+check);
+			
+			// check 변수가 0이면 기본적인 메시지 보내기
+			if(check == 0) {
+				// 여러 명에게 메시지 보내기 - 아이디를 ","로 구분
+				String accepters = request.getParameter("accepter");
+				// 아이디를 ,로 구분해서 나눈 뒤 accepter변수에 저장
+				String[] accepter = accepters.split(",");
+				// 여러 명에게 동시에 메시지를 보낼 때를 처리하기 위해 for문 사용
+				for (String str : accepter) {
+					Execute.service(writeService,
+							getDTO(request.getParameter("title"), request.getParameter("content"), str, loginDto));
+				}
+	
+			} else {
+				// 전체 회원의 아이디를 가져오기 위해 memberListService를 실행해서 List에 담아 놓는다.
+				List<MemberDTO> list = (List<MemberDTO>) Execute.service(memberListService, pageObject);
+				for(MemberDTO dto : list) {
+					if(!dto.getId().equals("admin")) {
+						Execute.service(writeService,
+								getDTO(request.getParameter("title"), request.getParameter("content"), dto.getId(), loginDto), 1);
+					}
+				}
+			}
+			jsp = "redirect:list.do?pageType=sen";
+
+			break;
+
+		case "/message/delete.do":
+			System.out.println("MessageController.execute().delete 처리");
+			// list에서 삭제하는 지 view에서 삭제하는 지 확인하기 위한 변수를 넘겨 받음 -> 0 : list, 1 : view
+			String deleteType = request.getParameter("deleteType");
+			// 보낸 메시지함으로 돌아갈 지, 받은 메시지함으로 돌아갈 지 확인하는 변수
+			pageType = request.getParameter("pageType");
+
+			// 삭제 처리
+			// 둘 중 아무도 삭제를 안 했으면 accdel, sendel 변수 모두 0
+			// 받은 사람이 삭제 -> accdel = 1, 보낸 사람이 삭제 -> sendel = 1
+			if (deleteType.equals("0")) {
+				// 처리할 글 번호 가져오기
+				// 리스트에서 번호를 받음
+				String[] nos = request.getParameterValues("rowCheck");
+				jsp = updateStatus(request, nos, pageType, loginDto);
+
+			} else if (deleteType.equals("1")) {
+				// 처리할 글 번호 가져오기
+				// 상세보기에서 번호를 받음
+				String[] nos = request.getParameterValues("no");
+				jsp = updateStatus(request, nos, pageType, loginDto);
+			}
+
+			break;
+
+		default:
+			break;
+		}
+
+		return jsp;
+	}// end of execute()
+
+	// 글쓰기를 위한 DTO 가져오는 method
+	private MessageDTO getDTO(String title, String content, String accepter, LoginDTO loginDto) {
+		MessageDTO dto = new MessageDTO();
+
+		dto.setTitle(title);
+		dto.setContent(content);
+		dto.setAccepter(accepter);
+		dto.setSender(loginDto.getId());
+
+		return dto;
+	}// end of getDTO()
+
+	// 삭제 처리를 위한 DTO 가져오기
+	private MessageDTO getDTO(HttpServletRequest request, int no) throws Exception {
+		MessageDTO dto = (MessageDTO) Execute.service(viewService, no, 0);
+		return dto;
+	}
+
+	// 최종 삭제 전 sendel, accdel 변수 update : 0 -> 1
+	private String updateStatus(HttpServletRequest request, String[] nos, String pageType, LoginDTO loginDto) throws Exception {
+		System.out.println("MessageController.updateStatus()");
+		String jsp = "";
+
+		// 다중 삭제를 위해 forEach문 사용 - 넘겨 받은 글 번호들을 하나씩 가져온다.
+		for (String str : nos) {
+			// 글번호 - String을 int로 바꿈
+			int getNo = Integer.parseInt(str);
+			// 글번호에 맞는 MessageDTO 가져오기
+			MessageDTO msgDto = getDTO(request, getNo);
+			// session의 아이디와 받은 사람 아이디 일치하는 지 확인
+			if (loginDto.getId().equals(msgDto.getAccepter())) {
+				// sendel이 0인지 확인 -> 0이면 최종 삭제 x
+				if (msgDto.getSendel() == 0) {
+					// accdel변수를 1로 바꿈, 최종 삭제 x
+					Execute.service(updateStatusService, getNo, 1);
+					if (pageType.equals("sen")) jsp = "redirect:list.do?pageType=sen";
+					if (pageType.equals("acc")) jsp = "redirect:list.do?pageType=acc";
+					if (pageType.equals("no")) jsp = "redirect:list.do?pageType=no";
+
+
+				// sendel 변수가 1인 상태에서 삭제를 할 때 -> 최종 삭제
+				} else if (msgDto.getSendel() == 1)
+					// DB에서 최종 삭제 처리
+					jsp = executeDelete(pageType, nos);
+
+				// end of if(loginDto.getId().equals(msgDto.getAccepter()))
+			} else if (loginDto.getId().equals(msgDto.getSender())) {
+				// accdel이 0인지 확인 -> 0이면 최종 삭제 x
+				if (msgDto.getAccdel() == 0) {
+					// sendel변수를 1로 바꿈, 최종 삭제 x
+					Execute.service(updateStatusService, getNo, 2);
+					if (pageType.equals("sen")) jsp = "redirect:list.do?pageType=sen";
+					if (pageType.equals("acc")) jsp = "redirect:list.do?pageType=acc";
+					if (pageType.equals("no")) jsp = "redirect:list.do?pageType=no";
+
+				// accdel 변수가 1인 상태에서 삭제를 할 때 -> 최종 삭제
+				} else if (msgDto.getAccdel() == 1)
+					jsp = executeDelete(pageType, nos);
+
+			} // end of if(loginDto.getId().equals(msgDto.getSender()))
+		} // end of for(String str : nos)
+		return jsp;
+	}// end of updateStatus()
+
+	// 최종 삭제 요청 시 method
+	private String executeDelete(String pageType, String[] deleteNo) throws Exception {
+		System.out.println("MessageController.executeDelete()");
+		System.out.println("MessageController.executeDelete().pageType : "+pageType);
+		String jsp = "";
+
+		if (pageType.equals("sen")) { // 받은 메시지
+			for (String str : deleteNo)
+				Execute.service(deleteService, str);
+
+			jsp = "redirect:list.do?pageType=sen";
+
+		} else if(pageType.equals("acc")) {// 보낸 메시지
+			for (String str : deleteNo)
+				Execute.service(deleteService, str);
+
+			jsp = "redirect:list.do?pageType=acc";
+			
+		} else {// 안읽은 메시지함
+			for (String str : deleteNo)
+				Execute.service(deleteService, str);
+			
+			jsp = "redirect:list.do?pageType=no";
+		}
+		System.out.println("MessageController.executeDelete().jsp : "+jsp);
+		return jsp;
+	}// end of executeDelete()
+
+}// end of MessageController class
